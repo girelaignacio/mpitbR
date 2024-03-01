@@ -53,8 +53,6 @@ mpitb.est <- function(set, klist = NULL, weights = NULL,
   nomeasures = Args$nomeasures
   noindmeasure = Args$noindmeasures
 
-  print(nomeasures)
-  print(noindmeasure)
 
 # 2) Arguments treatment --------------------------------------------------
 
@@ -147,7 +145,7 @@ mpitb.est <- function(set, klist = NULL, weights = NULL,
 
     cat("DONE: Cross-section AF partial measures estimated\n")
     } else if ((isFALSE(nomeasures) & isFALSE(cot)) & isFALSE(noindmeasure))  {
-      warning("Neither cross-section of AF measures nor changes over time estimates are set. Only indicators related measures such as censored and uncensored headcount ratios can be calculated.")
+      # warning("Neither cross-section of AF measures nor changes over time estimates are set. Only indicators related measures such as censored and uncensored headcount ratios can be calculated.")
     }
 
 # 4) Indicators-related measures ------------------------------------------
