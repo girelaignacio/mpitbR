@@ -1,0 +1,34 @@
+{
+    "type": [
+        0,
+        1,
+        2,
+        2,
+        0,
+        1,
+        2,
+        3,
+        0,
+        1,
+        2,
+        0,
+        1,
+        2
+    ],
+    "data": [
+        "> ",
+        "usethis::use_git()",
+        "\u001B[32m✔\u001B[39m Setting active project to \u001B[34m'C:/Users/girel/OneDrive/Documentos/mpitbR'\u001B[39m\n\u001B[32m✔\u001B[39m Initialising Git repo\n\u001B[32m✔\u001B[39m Adding \u001B[34m'.Rproj.user'\u001B[39m, \u001B[34m'.Rhistory'\u001B[39m, \u001B[34m'.Rdata'\u001B[39m, \u001B[34m'.httr-oauth'\u001B[39m, \u001B[34m'.DS_Store'\u001B[39m, \u001B[34m'.quarto'\u001B[39m to \u001B[34m'.gitignore'\u001B[39m\nThere are 9 uncommitted files:\n* \u001B[34m'.gitignore'\u001B[39m\n* \u001B[34m'.Rbuildignore'\u001B[39m\n* \u001B[34m'data/'\u001B[39m\n* \u001B[34m'DESCRIPTION'\u001B[39m\n* \u001B[34m'LICENSE.md'\u001B[39m\n* \u001B[34m'man/'\u001B[39m\n* \u001B[34m'mpitbR.Rproj'\u001B[39",
+        "m\n* \u001B[34m'NAMESPACE'\u001B[39m\n* \u001B[34m'R/'\u001B[39m\nIs it ok to commit them?\n\n1: No\n2: Absolutely\n3: Negative\n\n",
+        "Selection: ",
+        "2",
+        "\u001B[32m✔\u001B[39m Adding files\n\u001B[32m✔\u001B[39m Making a commit with message \u001B[34m'Initial commit'\u001B[39m\n",
+        "Error in libgit2::git_signature_default : \n  config value 'user.name' was not found\n",
+        "> ",
+        "usethis::use_git()",
+        "There are 35 uncommitted files:\n* \u001B[34m'.gitignore'\u001B[39m\n* \u001B[34m'.Rbuildignore'\u001B[39m\n* \u001B[34m'data/syn_cdta.rda'\u001B[39m\n* \u001B[34m'DESCRIPTION'\u001B[39m\n* \u001B[34m'LICENSE.md'\u001B[39m\n* \u001B[34m'man/mpitb.set.Rd'\u001B[39m\n* \u001B[34m'man/syn_cdta.Rd'\u001B[39m\n* \u001B[34m'mpitbR.Rproj'\u001B[39m\n* \u001B[34m'NAMESPACE'\u001B[39m\n* \u001B[34m'R/absolute.change.R'\u001B[39m\n* ...\nIs it ok to commit them?\n\n1: Not now\n2: For sure\n3: No way\n\n",
+        "Selection: ",
+        "2",
+        "\u001B[32m✔\u001B[39m Adding files\n\u001B[32m✔\u001B[39m Making a commit with message \u001B[34m'Initial commit'\u001B[39m\n\nRestarting R session...\n\n"
+    ]
+}
