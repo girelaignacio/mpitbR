@@ -17,6 +17,9 @@ absolute.change <- function(X, ...){
   # now modify the rownames with this modifications
   X$id <- paste(subgs,years,sep=".")
 
+  print(X)
+  print(time)
+
   X$year <- unlist(sapply(X[,time], function(x) dots$years.list[x]))
 
   # get the levels from rownames(X)

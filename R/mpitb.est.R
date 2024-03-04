@@ -1,11 +1,143 @@
-mpitb.est <- function(set, klist = NULL, weights = NULL,
-                      measures = c("M0","H","A"),
-                      indmeasures = c("hd","hdk","actb","pctb"), indklist = NULL,
-                      over = NULL, ...,
-                      cotyear = NULL, tvar = NULL,
-                      cotmeasures = c("M0","H","A","hd","hdk"), ann = TRUE, cotklist = NULL,
-                      nooverall = FALSE, level = 0.95,
-                      multicore = getOption("mpitb.multicore")){
+#' Estimate multidimensional poverty indices based on the Alkire-Foster method
+#'
+#' @description
+#' Estimate multidimensional poverty indices (MPI) based on the Alkire-Foster (AF) method including
+#' disaggregated cross-sectional and changes over time estimates as well as quantities such as standard
+#' errors and confidences intervals (accounting for the household survey design).
+#'
+#'
+#' @param set a "mpitb_set"-class object in which data, indicators, names and description have been specified.
+#' @param klist a numeric vector representing the poverty cut-offs for calculating the MPI. Should be values between 1 and 100.
+#' @param weights either a character value or a numeric vector.
+#' @param measures a character vector with the MPI and partial measures. Default include all the measures \code{c("M0","A","H")}. For more information, see Details section below.
+#' @param indmeasures a character vector with the indicator-specific measures. Default include all the measures \code{c("hd", "hdk", "actb", "pctb")}. For more information, see Details section below.
+#' @param indklist a numeric vector representing the poverty cut-offs for calculating indicator-specific measures. Should be values between 1 and 100. If \code{NULL}, it will be equal to \code{klist}.
+#' @param over a character vector with columns names of the population subgroups in data.
+#' @param ... other arguments
+#' @param tvar a character value containing the column name of the time ID variable in the data.  This argument determines if changes over time are calculated.
+#' @param cotyear a character value containing the column name of the years variable in the data. This argument is required if annualized changes over time measure are desired.
+#' @param cotmeasures a character vector with the changes over time measures. Default include all the measures \code{c("M0","A","H","hd", "hdk")}. For more information, see Details section below.
+#' @param ann logical. If \code{TRUE}, annualized changes over time measure are estimated. If \code{FALSE}, only  non-annualized changes over time are calculated. Default value is \code{TRUE}.
+#' @param cotklist a numeric vector representing the poverty cut-offs for calculating changes over time measures. Should be values between 1 and 100. If \code{NULL}, it will be equal to \code{klist}.
+#' @param cotoptions a character vector. If "total", estimates change over the total period of observation, i.e. from the first year of observation to the last year of observation. If "insequence", then  estimates all consecutive (i.e. year-to-year) changes. The default is "total"
+#' @param noraw logical. If \code{TRUE}, non-annualized changes over time measure are not estimated. Default is \code{FALSE}.
+#' @param nooverall logical. If \code{TRUE}, estimations over all the observations are omitted, e.g., national level calculations, and only measure for the specified subgroups are estimated. Default is \code{FALSE}.
+#' @param level numeric value with the desired confidence level for the confidence interval calculations in decimal format. Default value is 0.95.
+#' @param multicore logical. Use \code{multicore} package for parallel estimation by measure and poverty cut-off over multiple processors? It uses forking approach. See Details below.
+#'
+#' @return An object with S3 class "mpitb_est" containing two data frames with the estimates of the cross-sectional measures (\code{lframe}-class) and changes over time (\code{cotframe}-class).
+#'
+#' @export
+#'
+#' @details
+#' This functions is a S3 method for "mpitb_set" class. Hence, the project
+#' has to be correctly specified with \code{mpitb.set()} function previously.
+#'
+#' The vector of poverty cut-offs (\eqn{k}) in percentage point, i.e., numbers
+#' between 1 and 100. Although the deprivation score (\eqn{c_i = \sum_{i=1}^n w_j g_{ij}^0}) is a real-valued
+#' function, given the weights, it will assume a limited number of values. The same
+#' occurs with the censored deprivation score. Therefore, despite accepting infinite
+#' number of values, results may not vary with close values of \eqn{k}. For this reason,
+#' it is recommended to use a very limited number of poverty cut-offs for the analysis.
+#'
+#' If nothing is passed to \code{weights} argument, equal nested weights are calculated
+#' by dimension and indicator. In this case, it is preferred to pass indicators as a list
+#' in \code{mpitb.set()}. If the user wants to pass another weighting
+#' scheme, she should first pass the indicators as a character vector in \code{mpitb.set()}
+#' and then pass a numeric vector in \code{weights} such that the elements of this
+#' vector match with the vector of indicators and all the weights sum up to 1.
+#'
+#' To specify the population subgroups (e.g., living area, sex, etc.) and estimate the
+#' disaggregated measures by each level of the subgroup, the user should pass the column
+#' names of the population subgroups in the data using \code{over} argument. If \code{over}
+#' is \code{NULL}, the measure are estimate using all the observations (e.g., national-level).
+#' If population subgroups are specified and\code{nooverall} is set to \code{TRUE},
+#' \code{mpitb.est()}, aggregate (or national-level) estimates will not be produced.
+#'
+#' Details on the AF measures estimation
+#'
+#' Available measures include the Adjusted Headcount Ratio (\eqn{M_0}), the
+#' Incidence (\eqn{H}) and the Intensity of poverty (\eqn{A}), as well as other
+#' indicator-specific measures
+#' such as the uncensored headcount ratio (\eqn{h_j}), the censored headcount ratio (\eqn{h_j(k)})
+#' and the absolute and percentage contribution.
+#'
+#' The three first partial measures are pass in \code{measures} argument. By default,
+#' \code{mpitb.est} calculates every measure \code{c("M0","H","A")}. The poverty
+#' cut-off (\eqn{k}) for these measures estimation is specified in \code{klist} argument.
+#'
+#' The indicator-specific measure are passed in \code{indmeasures} argument. By default,
+#' \code{mpitb.est} calculates every measure \code{c("hd","hdk","actb","pctb")}. The poverty
+#' cut-off (\eqn{k}) for these measures estimation is specified in \code{indklist} argument.
+#' If \code{indklist} is \code{NULL}, poverty cut-offs in \code{klist} is used.
+#' The absolute contribution \code{c("actb")} cannot be estimated without also
+#' passing the censored headcount
+#' ratios of each indicator  \code{c("hdk")} and the percentage contribution cannot be
+#' calculated without \code{c("hdk")} and \code{c("M0")} passed in \code{measures} argument.
+#'
+#' If any of these arguments is \code{NULL}, code{mpitb.est()} skips these
+#' measures. So it is useful for avoid calculating unnecessary estimations. For example,
+#' if \code{measures = c("H","A")} and \code{indmeasures = NULL}, only the Incidence and
+#' the Intensity will be estimated.
+#'
+#' Details on changes over time measures
+#'
+#' The user can decide which AF measure changes over time she want to study. This is
+#' set in \code{cotmeasures}. By default it calculates all the measure, except contributions, i.e.,
+#' \code{cotmeasure = c("M0","A","H","hd","hdk")}. It would be important to check this argument in order to save time.
+#' The poverty
+#' cut-off (\eqn{k}) for these measures estimation is specified in \code{cotklist} argument.
+#' If \code{cotklist} is \code{NULL}, poverty cut-offs in \code{klist} is used.
+#' The standard errors of the changes over time measures is estimated using Delta method.
+#'
+#' For calculating any point estimate for each time period and any change over time
+#' measure, \code{tvar} should not be \code{NULL}. This argument should be a character with the
+#' column name that references the time period \eqn{t = 1, \ldots,T}.
+#'
+#' Changes over time measure can also be annualized. For such measure, information about
+#' the years is needed. \code{cotyear}  should be a character with the column name
+#' that have information about the years. Decimal digits are permitted. Argument \code{ann} is a logical
+#' value. If \code{TRUE}, annualized measures are calculated. If \code{cotyear} is passed and
+#' \code{ann} is \code{FALSE}, only non-annualized measures are estimated. If only annualized measure are
+#' under study, the user can switch \code{noraw} to \code{TRUE} to avoid estimating non-annualized changes.
+#'
+#' Finally, if there are more than two years survey rounds, the user can decide if estimate the
+#' change over the total period of observation, i.e. from the first year of observation to the
+#' last year of observation or year-to-year changes. To do the former, \code{cotoptions = "total"}
+#' whereas for the latter case, \code{cotoptions = "insequence"}. By default, \code{cotoptions = "total"}
+#' to avoid unnecessary estimations.
+#'
+#' Some details on other arguments and estimations
+#'
+#' \code{multicore} and how the standard errors and confidence intervals are estimated.
+#'
+#'
+#' @rdname mpitb.est
+#'
+#' @references \emph{Alkire, S., Foster, J. E., Seth, S., Santos, M. E., Roche, J., & Ballon, P. (2015). Multidimensional poverty measurement and analysis. Oxford University Press.}
+#'
+#'              \emph{Alkire, S., Roche, J. M., & Vaz, A. (2017). Changes over time in multidimensional poverty: Methodology and results for 34 countries. World Development, 94, 232-249}. \url{10.1016/j.worlddev.2017.01.011}
+#'
+#' @example man/examples/example-mpitb.est.R
+#'
+#' @seealso \code{coef}, \code{confint}, \code{vcov}, and \code{summary} methods, and \code{mpitb.set} function.
+#'
+#' @author Ignacio Girela
+
+mpitb.est <- function(set, ...) {UseMethod("mpitb.est", set)}
+
+#' @rdname mpitb.est
+#' @export
+
+mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
+                        measures = c("M0","H","A"),
+                        indmeasures = c("hd","hdk","actb","pctb"), indklist = NULL,
+                        over = NULL, ...,
+                        cotyear = NULL, tvar = NULL,
+                        cotmeasures = c("M0","H","A","hd","hdk"), ann = TRUE,
+                        cotklist = NULL, cotoptions = "total", noraw = FALSE,
+                        nooverall = FALSE, level = 0.95,
+                        multicore = getOption("mpitb.multicore")){
 
 # Catch call --------------------------------------------------------------
 
@@ -24,7 +156,7 @@ mpitb.est <- function(set, klist = NULL, weights = NULL,
 
   this.call <- match.call(expand.dots = FALSE)
   # Print this call so that the user can check if arguments are correctly assigned
-  print(this.call)
+  #print(this.call)
 
 # 1) Check arguments ------------------------------------------------------
 
@@ -43,24 +175,37 @@ mpitb.est <- function(set, klist = NULL, weights = NULL,
 
   cotyear = Args$cotyear
   tvar = Args$tvar
+
   cotmeasures = Args$cotmeasures
   ann = Args$ann
+
   cotklist = Args$cotklist
+  cotoptions = Args$cotoptions
+  noraw = Args$noraw
 
   nooverall = Args$nooverall # ok the checks
   level = Args$level # ok the checks
+  multicore = Args$multicore
 
+  cot = Args$cot
   nomeasures = Args$nomeasures
   noindmeasure = Args$noindmeasures
 
+# 2) Some arguments treatment ---------------------------------------------
 
-# 2) Arguments treatment --------------------------------------------------
+  # In this part, some argument of the mpitb.est() functions are treated. More
+  # specifically, weights and indicators. If nothing is specified for the
+  # weighting scheme, by default, nested equal eights are calculated. All these
+  # treatments are printed, so the user can control if it is ok.
+  # Finally, the deprivations score is calculated and added to the variables of
+  # the survey design.
 
   ### 2.1) WEIGHTS, INDICATORS AND DIMENSIONS ####
   {# `indicators` is a list and it is in `set`
   indicators <- set$indicators
   # if `weights` == "equal", create nested weights
   if (grepl(weights,"equal")) {
+    weights.scheme <- "equal"
     # equal weights for each dimension
     weight_dim <- 1/length(indicators)
     weights_dim <- rep(weight_dim, length(indicators))
@@ -68,20 +213,45 @@ mpitb.est <- function(set, klist = NULL, weights = NULL,
     weights_ind <- sapply(indicators, function(x) rep(1/length(x) * weight_dim,length(x)))
     # weights and indicators as ordered vectors such that each indicator match its corresponding weights
     weights <- unlist(weights_ind, use.names = F)
+    dimensions <- names(indicators)
+    indicatorsList <- indicators
     indicators <- unlist(indicators, use.names = F)
     names(weights) <- indicators
   } else { # if `weights` is numeric and sum up to 1 (preferred weights specification)
     # indicators as a vector
+    weights.scheme <- "pref.spec"
     indicators <- unlist(indicators, use.names = F)
     names(weights) <- indicators
   }
-  print(indicators)
-  print(weights)
+  cat("\t\t   ****** SPECIFICATION ******\n")
+  cat("Call:\n")
+  print(this.call)
+  cat("Name: ",attr(set,"name"),"\n")
+  cat("Weighting scheme: ", weights.scheme,"\n")
+  cat("Description: ",attr(set,"desc"),"\n")
+
+  cat("___________________\n")
+  if(!is.null(dimensions)){
+    catDimensions <- data.frame(dimensions,weights_dim,
+                              row.names = paste(paste("Dimension ", 1:length(dimensions),": ",sep="")))
+    catDimensions[,3]<-sapply(catDimensions[,1], function(x) paste0("(",toString(indicatorsList[[x]]),")"))
+    colnames(catDimensions) <- NULL
+    print(catDimensions, digits = 3)
+    cat("___________________\n")
+    }
+  catIndicators <- data.frame(indicators,weights,
+                              row.names = paste(paste("Indicator ", 1:length(indicators),": ",sep="")))
+  colnames(catIndicators) <- NULL
+  print(catIndicators, digits = 3)
+  cat("\n")
   # RESULTS
   # indicators <- character: Names of the indicators
   # weights <- numeric: Relative weights of the indicators in the same order as the vector
 # End of '2.1) WEIGHTS, INDICATORS AND DIMENSIONS'
-}
+  }
+
+
+
   ### 2.2) CALCULATE THE DEPRIVATION SCORE ####
   {# `data` is in`set`
   data <- set$data
@@ -96,41 +266,28 @@ mpitb.est <- function(set, klist = NULL, weights = NULL,
   # data <- survey.design: Survey design with the deprivations score
 # End of '2.2) CALCULATE THE DEPRIVATION SCORE'
   }
-  ### 2.3) CHANGES OVER TIME VARIABLES ####
-  {
-  if (!is.null(tvar)){
-    # create a logical variable `cot`  if `tvar` is not null
-    cot <- TRUE
-    # if the years are missing, annualized measures cannot be calculated
-    if (is.null(cotyear) & isTRUE(ann)){
-      # if `cotyear` is null `ann` cannot be TRUE
-      ann <- FALSE
-      warning("Years for changes over time measures (`cotyear`) are not specified but `ann` is TRUE.
-            Hence, `ann` is coerced to FALSE and non-annualized measures are only calculated.")
-    } else if (!is.null(cotyear) & isFALSE(ann)) {
-      ann <- FALSE
-      warning("Years for changes over time measures (`cotyear`) are specified but `ann` is FALSE.
-            Hence, `ann` is coerced to FALSE and non-annualized measures are only calculated.")
-    }
-  } else {cot <- FALSE}
-  # RESULTS:
-  # cot -> logical: If TRUE, COT measure are calculated
-  # tvar, cotyear, ann, cotklist (character, character, logical, numeric)
-  # cotmeasures (character)
-# End of '2.3) CHANGES OVER TIME VARIABLES'
-  }
 
-  ### 2.4) PARALLEL PROCESSING
-  if(multicore && !requireNamespace("parallel",quietly=TRUE)) {
-    multicore <- FALSE
-  }
-  if(multicore){print("Parallel calculations by measures and poverty cutoffs")}
+
+
+  cat("\t\t   ****** ESTIMATION ******\n")
+
+
+
 
 # 3) AF measures ----------------------------------------------------------
 
-  ctype_lev <- list()
+  # In this section, we estimate the MPI and the two main partial AF measures
+  # (A and H). Confidence intervals are calculated using svyciprop() function
+  # from the survey R package. This functions do not provide the covariance
+  # matrix of the estimates when we calculate measures by year. This prevents
+  # from using delta method when calculating the standard errors of functions
+  # of the estimates over time (changes over time measures).
+
+ lframe <- NULL
 
   if(isFALSE(nomeasures)){
+    cat("___________________\n")
+    cat("Partial AF measures: '",measures,"' under estimation... ")
     # arguments to vectorize over
     VecArgs <- expand.grid(list(k = klist, measure = measures), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
     # MoreArgs (a list of other arguments to the mpitb measures FUN)
@@ -143,15 +300,18 @@ mpitb.est <- function(set, klist = NULL, weights = NULL,
     # include parallel processing
     AFmeasuresList <-  (if (multicore) parallel::mcmapply else mapply)(mpitb.measure, prop = TRUE, k = VecArgs$k, measure = VecArgs$measure, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 
-    cat("DONE: Cross-section AF partial measures estimated\n")
-    } else if ((isFALSE(nomeasures) & isFALSE(cot)) & isFALSE(noindmeasure))  {
-      # warning("Neither cross-section of AF measures nor changes over time estimates are set. Only indicators related measures such as censored and uncensored headcount ratios can be calculated.")
+    lframe <- do.call("rbind", AFmeasuresList)
+    #class(lframe) <- "lframe"
+
+    cat("DONE\n\n")
     }
 
 # 4) Indicators-related measures ------------------------------------------
 
 # This include hd, hdk, actb and pctb ####
     if (isFALSE(noindmeasure)){
+      cat("___________________\n")
+      cat("Indicator-specific measures: '", indmeasures,"' under estimation... ")
 
       # if indklist is NULL, use the same klist as in cross-sectional AF measures
       if(is.null(indklist)){indklist <- klist}
@@ -172,61 +332,130 @@ mpitb.est <- function(set, klist = NULL, weights = NULL,
       # include parallel processing
       indmeasuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.indmeasure, prop = TRUE, k = VecArgs$k, indmeasure = VecArgs$indmeasure, indicator = VecArgs$indicator, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 
-      # convert to data frame
-      indmeasuresList <- do.call("rbind", indmeasuresList)
-      cat("DONE: Cross-section other indicators-related partial measures estimated\n")
-  }
+      # convert to dataframe
+      indmeasures <- do.call("rbind", indmeasuresList)
+
+      # estimate contributions of each indicator
+        # actb
+      if("actb"%in%contmeasures){indmeasures <- mpitb.actb(indmeasures, weights, indicators)}
+        # pctb
+      if("pctb"%in%contmeasures){indmeasures}
+      ######################
+      ######insert code here
+      ######################
+
+
+      # check if lframe already exists (if nomeasures is FALSE) before binding the indmeasures estimations
+      # if(!is.null(lframe)){
+      #   lframe <- rbind(lframe,indmeasures)
+      # }else{
+      #     lframe <- indmeasures
+      #     class(lframe) <- "lframe"
+      #   }
+      cat("DONE\n\n")
+    }
+
+
+
+
+
 
 # 5) Changes over time measures -------------------------------------------
 
+  cotframe <- NULL
+
 # This include absolute and relative (annualized) changes ####
   if(isTRUE(cot)){
+    cat("--------------\n")
+    cat("Estimate changes over time over '",cotmeasures,"' measures \n")
     # if cotklist is NULL, use the same klist as in cross-sectional AF measures
     if(is.null(cotklist)){cotklist <- klist}
+    # some argument check
+    # match `tvar` and `cotyear`
+    if(isTRUE(ann)){
+      # create a vector with the years id numbers with `tvar`
+      years.list <- sort(unique(data$variables[,cotyear]))
+      names(years.list) <- sort(as.character(unique(data$variable[,tvar])))
+      # non-annualized measures finally included?
+      if(isTRUE(noraw)){annualized <- c(TRUE)}else{annualized <- c(FALSE,TRUE)}
+    } else {
+        if(isTRUE(noraw)){warning("`ann` is FALSE but `noraw` is TRUE. No change-over-time measure can be estimated. By coercion, non-annualized measure are estimated")}
+        # create a vector with the years id names with `tvar`
+        years.list <- sort(as.character(unique(data$variables[,tvar])))
+        names(years.list) <- sort(as.character(unique(data$variables[,tvar])))
+        # annualized is coerced to FALSE under this setting
+        annualized <- c(FALSE)
+    }
+    # subset data according to the cotoptions ("total" or "insequence")
+    if(cotoptions == "total"){
+      data <- subset(data, t == which.min(years.list) | t == which.max(years.list))
+    } # if "insequence", keep it and calculate year-to-year changes
 
-
+    # separate indicators-related measure of the typical AF measures. This is necessary for efficient arguments vectorization below
     indmeasures <- c("hd","hdk")[c("hd","hdk") %in% cotmeasures]
     cotmeasures <- c("M0","A","H")[c("M0","A","H") %in% cotmeasures]
 
-
-    # arguments to vectorize over
-    VecArgs <- expand.grid(list(k = cotklist, measure = cotmeasures, indicator = NA), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
-    VecArgs <- rbind(VecArgs, expand.grid(list(k = cotklist, measure = indmeasures, indicator = indicators), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE))
     # MoreArgs (a list of other arguments to the mpitb cotmeasures FUN)
     OtherArgs <- list(data = data, over = over,
                       tvar = tvar, cotyear = cotyear,
                       level = level)
 
+    # estimate measures by poverty cut-off k
+      # before set arguments to vectorize
+      # over the AF measures
+    VecArgs <- expand.grid(list(k = cotklist, measure = cotmeasures), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
 
-    measuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.measure, prop = FALSE, k = VecArgs$k, measure = VecArgs$measure, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+    AFmeasuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.measure, prop = FALSE, k = VecArgs$k, measure = VecArgs$measure, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+      # now over the indicators-related measures
+    VecArgs <- expand.grid(list(k = cotklist, indmeasure = indmeasures, indicator = indicators), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
 
+    indmeasuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.indmeasure, prop = FALSE, k = VecArgs$k, measure = VecArgs$measure, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
 
-    measuresList <- unlist(measuresList, recursive = FALSE)
-
+    measuresList <- unlist(list(AFmeasuresList,indmeasuresList), recursive = FALSE)
+    print(measuresList)
     # Calculate (annualized) absolute and relative changes
 
-      # match `tvar` and `cotyear`
-    if(isTRUE(ann)){
-      years.list <- sort(unique(data$variables[,cotyear]))
-      names(years.list) <- sort(as.character(unique(data$variable[,tvar])))
-      annualized <- c(FALSE,TRUE)
-      } else {
-        years.list <- sort(as.character(unique(data$variables[,tvar])))
-        names(years.list) <- sort(as.character(unique(data$variables[,tvar])))
-        annualized <- c(FALSE)
-      }
     # arguments to vectorize over
     VecArgs <- expand.grid(list(change.measure = c("abs","rel"), annualized = annualized), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
 
     # MoreArgs (a list of other arguments to the mpitb cotmeasures FUN)
-
     OtherArgs <- list(years.list = years.list, object = measuresList,
                       level = level, degfs = survey::degf(data))
     cotmeasuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.cotmeasure, change.measure = VecArgs$change.measure, annualized = VecArgs$annualized, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
-    cotmeasuresList <- do.call("rbind",unlist(cotmeasuresList, recursive = FALSE))
+
+    cotframe <- do.call("rbind",unlist(cotmeasuresList, recursive = FALSE))
+    class(cotframe) <- "cotframe"
+    cat("DONE\n\n")
   }
 
-  return(indmeasuresList)
+
+
+  cat("\t\t   ****** RESULTS ******\n")
+  cat("___________________\n")
+  cat("Parameters\n")
+  if(cot)cat("Numer of time periods: '", length(years.list))
+  cat("Subgroups: ",length(over),"\n")
+  cat("Poverty cut-offs (k): ", length(klist),"\n\n")
+
+  cat("*Notes: \n\t Confidence level:", 100*level,
+      "%\n\t Parallel estimations: ", multicore)
+
+
+
+
+# 6) Prepare output -------------------------------------------------------
+
+  outputList <- list(
+    lframe = lframe,
+    cotframe = cotframe)
+  attr(outputList,"name") <- attr(set,"name")
+
+  attr(outputList,"desc") <- attr(set,"desc")
+
+  class(set) <- "mpitb_est"
+
+  # End of the code :)
+  return(list(AF = lframe,IND = indmeasures))
 }
 
 

@@ -35,6 +35,6 @@ transform.svyciprop <- function(X){
   colnames(X) <- cols
   # change colnames according to names (slower but tidier!)
   colnames(X)[colnames(X) %in% c("y", "se.as.numeric(y)","ci_l","ci_u")] <- c("b", "se","ll","ul")
-  X[X$subg == "nat","loa"] <- NA_character_
+  #X[X$subg == "nat","loa"] <- NA_character_
   return(X)
 }

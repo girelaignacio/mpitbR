@@ -30,7 +30,7 @@ mpitb.M0_svyciprop <- function(k, data, over,
   ctype_lev$measure <- "M0"
   ctype_lev$ctype <- "lev"
   ctype_lev$k <- k*100
-  ctype_lev$indicator <- NA
+  #ctype_lev$indicator <- NA
 
   # order dataframe by the column names
   ordered_columns <- c("b", "se", "ll", "ul")

@@ -1,10 +1,12 @@
 .checkArgs_est <- function(set, klist = NULL, weights = NULL,
-                             measures = c("M0","H","A"),
-                             indmeasures = c("hd","hdk","actb","pctb"), indklist = NULL,
-                             over = NULL, ...,
-                             cotyear = NULL, tvar = NULL,
-                             cotmeasures = c("M0","H","A","hd","hdk"), cotklist = NULL, ann = TRUE,
-                             nooverall = FALSE, level = 0.95){
+                            measures = c("M0","H","A"),
+                            indmeasures = c("hd","hdk","actb","pctb"), indklist = NULL,
+                            over = NULL, ...,
+                            cotyear = NULL, tvar = NULL,
+                            cotmeasures = c("M0","H","A","hd","hdk"), ann = TRUE,
+                            cotklist = NULL, cotoptions = "total", noraw = FALSE,
+                            nooverall = FALSE, level = 0.95,
+                            multicore = getOption("mpitb.multicore")){
 
 # Check arguments  --------------------------------------------------------
 
@@ -47,6 +49,8 @@
   stopifnot("`indmeasures` must be a character vector" = (is.character(indmeasures) | is.null(indmeasures)))
   if(is.character(indmeasures)){
     stopifnot("Incorrect `indmeasures` specification" = all(indmeasures %in% c("hd","hdk","actb","pctb")))
+    if( ("actb" %in% indmeasures) & !("hdk" %in% indmeasures) ){stop("'actb' requires 'hdk' in `indmeasures`")}
+    if( (("pctb" %in% indmeasures) & !("hdk" %in% indmeasures)) | (("pctb" %in% indmeasures) & !("M0" %in% measures)) ){stop("'pctb' requires both 'hdk' in `indmeasures` and 'M0' in `measures`")}
     noindmeasures <- FALSE
   } else if (is.null(indmeasures)){
     noindmeasures <- TRUE
@@ -86,6 +90,12 @@
   stopifnot("`level` argument out of bounds" = level > 0 & level < 1)
   if (level < 0.90) stop("`level` is below 0.90. Check `level` argument or confidence intervals will be estimated with a level lower than 90%!")
 
+  ### `multicore` argument
+  ## check if parallel processing
+  if(multicore && !requireNamespace("parallel",quietly=TRUE)) {
+    multicore <- FALSE
+  }
+
 # Changes over time arguments ---------------------------------------------
 
   ### `tvar` argument ####
@@ -101,7 +111,20 @@
     ## check if `tvar` has numeric arguments
     tvars <- unique(set$data$variables[,tvar])
     stopifnot("years of `tvar` column are not numeric" = is.numeric(tvars))
-  }
+    # create a logical variable `cot`  if `tvar` is not null
+    cot <- TRUE
+    # if the years are missing, annualized measures cannot be calculated
+    if (is.null(cotyear) & isTRUE(ann)){
+      # if `cotyear` is null `ann` cannot be TRUE
+      ann <- FALSE
+      warning("Years for changes over time measures (`cotyear`) are not specified but `ann` is TRUE.
+            Hence, `ann` is coerced to FALSE and non-annualized measures are only calculated.")
+    } else if (!is.null(cotyear) & isFALSE(ann)) {
+      ann <- FALSE
+      warning("Years for changes over time measures (`cotyear`) are specified but `ann` is FALSE.
+            Hence, `ann` is coerced to FALSE and non-annualized measures are only calculated.")
+    }
+  } else {cot <- FALSE}
 
   ### `cotyear` argument
   if (!is.null(cotyear)) {
@@ -133,15 +156,27 @@
     stopifnot("`cotklist` out of range. Values lower than 1 found" = cotklist >= 1)
   }
 
+  ### `cotoptions` argument ####
+  ## if `cotoptions` is null, total changes over time is estimated
+  ## "insequence" estimates year-to-year changes
+  if(cotoptions != "total"){
+    if ( cotoptions != "insequence" ) {cotoptions <- "total"}
+    }
+
+  ### `noraw` argument ####
+  ## if it is not logical, instead of stopping, coerce to FALSE
+  if(!is.logical(noraw)){noraw <- FALSE}
+
 
   return(list(
     set=set, klist = klist, weights = weights,
     measures = measures,
     indmeasures = indmeasures, indklist = indklist,
     over = over,
-    cotyear = cotyear, tvar = tvar, ann = ann,
-    cotmeasures = cotmeasures, cotklist = cotklist,
-    nooverall = nooverall, level = level,
-    nomeasures = nomeasures, noindmeasures = noindmeasures)
+    cotyear = cotyear, tvar = tvar,
+    cotmeasures = cotmeasures, ann = ann,
+    cotklist = cotklist, cotoptions = cotoptions, noraw = noraw,
+    nooverall = nooverall, level = level, multicore = multicore,
+    cot = cot, nomeasures = nomeasures, noindmeasures = noindmeasures)
     )
 }

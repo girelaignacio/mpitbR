@@ -1,8 +1,6 @@
 .checkArgs_set <- function(data, indicators, ..., name = "unnamed", desc = "desc."){
 
-  ##########################
-  #### Check arguments ####
-  #########################
+# Check arguments ---------------------------------------------------------
 
   ### `data` argument
   ## check if `data` missing argument
