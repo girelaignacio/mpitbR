@@ -17,9 +17,6 @@ absolute.change <- function(X, ...){
   # now modify the rownames with this modifications
   X$id <- paste(subgs,years,sep=".")
 
-  print(X)
-  print(time)
-
   X$year <- unlist(sapply(X[,time], function(x) dots$years.list[x]))
 
   # get the levels from rownames(X)
@@ -65,7 +62,7 @@ absolute.change <- function(X, ...){
   # calculate confidence intervals
   change$ll <- change$nlcon - stats::qt(p=(1-dots$level)/2, df=dots$degfs,lower.tail=FALSE) * change$SE
   change$ul <- change$nlcon + stats::qt(p=(1-dots$level)/2, df=dots$degfs,lower.tail=FALSE) * change$SE
-  change
+
 
   change$measure <- measure
 
@@ -103,7 +100,7 @@ absolute.change <- function(X, ...){
   rownames(change) <- NULL
 
   if (isTRUE(dots$annualized)){change$ann <- 1}else{change$ann <- 0}
-  change
+
   # change colnames
   colnames(change)[colnames(change) %in% c("nlcon", "SE")] <- c("b", "se")
 

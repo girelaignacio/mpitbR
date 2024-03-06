@@ -61,7 +61,6 @@ relative.change <- function(X, ...){
   # calculate confidence intervals
   change$ll <- change$nlcon - stats::qt(p=(1-dots$level)/2, df=dots$degfs,lower.tail=FALSE) * change$SE
   change$ul <- change$nlcon + stats::qt(p=(1-dots$level)/2, df=dots$degfs,lower.tail=FALSE) * change$SE
-  change
 
   change$measure <- measure
 
@@ -99,7 +98,7 @@ relative.change <- function(X, ...){
   rownames(change) <- NULL
 
   if (isTRUE(dots$annualized)){change$ann <- 1}else{change$ann <- 0}
-  change
+
   # change colnames
   colnames(change)[colnames(change) %in% c("nlcon", "SE")] <- c("b", "se")
 

@@ -3,7 +3,7 @@
                             indmeasures = c("hd","hdk","actb","pctb"), indklist = NULL,
                             over = NULL, ...,
                             cotyear = NULL, tvar = NULL,
-                            cotmeasures = c("M0","H","A","hd","hdk"), ann = TRUE,
+                            cotmeasures = c("M0","H","A","hd","hdk"), ann = FALSE,
                             cotklist = NULL, cotoptions = "total", noraw = FALSE,
                             nooverall = FALSE, level = 0.95,
                             multicore = getOption("mpitb.multicore")){
@@ -139,6 +139,7 @@
     tvars <- unique(set$data$variables[,tvar])
     stopifnot("years of `cotyear` column are not numeric" = is.numeric(years))
     if(ann == FALSE){warning("years are specified but annualized is not estimated")}
+    ann <- TRUE
     stopifnot("Elements of `tvar` and `cotyear` have different length" = length(years) == length(tvars))
   }
 

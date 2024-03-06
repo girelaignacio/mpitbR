@@ -55,7 +55,7 @@ mpitb.hd_svymean <- function(k, indicator, data, over,
   # (if (multicore) parallel::mclapply else lapply)
   # calculate the estimated measures with svymean because svyciprop do not yield
   # the covariance for delta method!
-  hdk_j <- lapply(bys, function(by) survey::svyby(survey::make.formula("y"),
+  hd_j <- lapply(bys, function(by) survey::svyby(survey::make.formula("y"),
                                                   by=survey::make.formula(by),
                                                   design=data, survey::svymean, covmat = TRUE, na.rm=FALSE))
   hd_j <- lapply(hd_j, function(x) {attr(x,"indicator") <- indicator; x})

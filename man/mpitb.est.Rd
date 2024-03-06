@@ -19,7 +19,7 @@ mpitb.est(set, ...)
   cotyear = NULL,
   tvar = NULL,
   cotmeasures = c("M0", "H", "A", "hd", "hdk"),
-  ann = TRUE,
+  ann = FALSE,
   cotklist = NULL,
   cotoptions = "total",
   noraw = FALSE,
@@ -51,7 +51,7 @@ mpitb.est(set, ...)
 
 \item{cotmeasures}{a character vector with the changes over time measures. Default include all the measures \code{c("M0","A","H","hd", "hdk")}. For more information, see Details section below.}
 
-\item{ann}{logical. If \code{TRUE}, annualized changes over time measure are estimated. If \code{FALSE}, only  non-annualized changes over time are calculated. Default value is \code{TRUE}.}
+\item{ann}{logical. If \code{TRUE}, annualized changes over time measure are estimated. If \code{FALSE}, only  non-annualized changes over time are calculated. Default value is \code{FALSE}.}
 
 \item{cotklist}{a numeric vector representing the poverty cut-offs for calculating changes over time measures. Should be values between 1 and 100. If \code{NULL}, it will be equal to \code{klist}.}
 
@@ -66,7 +66,7 @@ mpitb.est(set, ...)
 \item{multicore}{logical. Use \code{multicore} package for parallel estimation by measure and poverty cut-off over multiple processors? It uses forking approach. See Details below.}
 }
 \value{
-An object with S3 class "mpitb_est" containing two data frames with the estimates of the cross-sectional measures (\code{lframe}-class) and changes over time (\code{cotframe}-class).
+An object with S3 class "mpitb_est" containing two data frames with the estimates of the cross-sectional measures ("lframe"-class) and changes over time ("cotframe"-class).
 }
 \description{
 Estimate multidimensional poverty indices (MPI) based on the Alkire-Foster (AF) method including
@@ -95,10 +95,11 @@ To specify the population subgroups (e.g., living area, sex, etc.) and estimate 
 disaggregated measures by each level of the subgroup, the user should pass the column
 names of the population subgroups in the data using \code{over} argument. If \code{over}
 is \code{NULL}, the measure are estimate using all the observations (e.g., national-level).
-If population subgroups are specified and\code{nooverall} is set to \code{TRUE},
-\code{mpitb.est()}, aggregate (or national-level) estimates will not be produced.
+If population subgroups are specified and \code{nooverall} is set to \code{TRUE},
+ aggregate (or national-level) estimates will not be produced.
 
-Details on the AF measures estimation
+Details on the AF measures estimation:
+
 
 Available measures include the Adjusted Headcount Ratio (\eqn{M_0}), the
 Incidence (\eqn{H}) and the Intensity of poverty (\eqn{A}), as well as other
@@ -119,12 +120,12 @@ passing the censored headcount
 ratios of each indicator  \code{c("hdk")} and the percentage contribution cannot be
 calculated without \code{c("hdk")} and \code{c("M0")} passed in \code{measures} argument.
 
-If any of these arguments is \code{NULL}, code{mpitb.est()} skips these
+If any of these arguments is \code{NULL}, \code{mpitb.est()} skips these
 measures. So it is useful for avoid calculating unnecessary estimations. For example,
 if \code{measures = c("H","A")} and \code{indmeasures = NULL}, only the Incidence and
 the Intensity will be estimated.
 
-Details on changes over time measures
+Details on changes over time measures:
 
 The user can decide which AF measure changes over time she want to study. This is
 set in \code{cotmeasures}. By default it calculates all the measure, except contributions, i.e.,
@@ -141,8 +142,10 @@ column name that references the time period \eqn{t = 1, \ldots,T}.
 Changes over time measure can also be annualized. For such measure, information about
 the years is needed. \code{cotyear}  should be a character with the column name
 that have information about the years. Decimal digits are permitted. Argument \code{ann} is a logical
-value. If \code{TRUE}, annualized measures are calculated. If \code{cotyear} is passed and
-\code{ann} is \code{FALSE}, only non-annualized measures are estimated. If only annualized measure are
+value. If \code{TRUE}, annualized measures are calculated. If \code{cotyear} is passed, \code{ann}
+is automatically set to \code{TRUE}. If the former is not \code{NULL} and
+\code{ann} is \code{FALSE}, only non-annualized
+measures are estimated. If only annualized measure are
 under study, the user can switch \code{noraw} to \code{TRUE} to avoid estimating non-annualized changes.
 
 Finally, if there are more than two years survey rounds, the user can decide if estimate the
@@ -151,9 +154,17 @@ last year of observation or year-to-year changes. To do the former, \code{cotopt
 whereas for the latter case, \code{cotoptions = "insequence"}. By default, \code{cotoptions = "total"}
 to avoid unnecessary estimations.
 
-Some details on other arguments and estimations
+Some details on other arguments and estimations:
 
-\code{multicore} and how the standard errors and confidence intervals are estimated.
+The package includes the possibility to do parallel calculations over all the measures and poverty cut-offs.
+If \code{multicore} is \code{TRUE}, the package proceeds with parallel estimations. Caveat: this package uses
+Forking method for parallelization which is only available on Unix-like systems (including Linux), i.e., Windows
+users cannot benefit from parallelization.
+
+For every measure the standard errors and confidence intervals are estimated. The former are estimated taking into
+account the survey structure whereas the latter are estimated considering measures as proportions using \code{\link[survey]{svyciprop()}}
+function from "survey" R package (it uses the "logit" method which consists of fitting a logistic regression model
+and computes a Wald-type interval on the log-odds scale, which is then transformed to the probability scale).
 }
 \examples{
 library(mpitbR)

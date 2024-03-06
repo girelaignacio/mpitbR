@@ -1,6 +1,5 @@
-###############
-#### UTILS ####
-###############
+
+# Update survey design ----------------------------------------------------
 
 update.svy <- function(object, ...) {
   dots <- substitute(list(...))[-1]
@@ -15,9 +14,7 @@ update.svy <- function(object, ...) {
 }
 
 
-####################
-#### TRANSFORMS ####
-####################
+# Transform svyby class ---------------------------------------------------
 
 transform.svyciprop <- function(X){
   # add subgroup column
@@ -38,3 +35,4 @@ transform.svyciprop <- function(X){
   #X[X$subg == "nat","loa"] <- NA_character_
   return(X)
 }
+
