@@ -7,7 +7,7 @@ mpitb.A_svyciprop <- function(k, data, over,
   censored_c.score <- censored_c.score(data$variables$c.score, k)
   # calculate censored deprivation score and add to the dataset
   poor.mpi <- ifelse(data$variables$c.score >= k,1,0)
-  data <- update.svy(data, y = censored_c.score, mpi.k = poor.mpi)
+  data <- update_svy(data, y = censored_c.score, mpi.k = poor.mpi)
 
   # define the vector of the subgroups (check if should be calculated over time)
   # define the expression for the formula
@@ -25,7 +25,7 @@ mpitb.A_svyciprop <- function(k, data, over,
   # transform.svyciprop function is in utils.R
   # if it is used Linux OS, it uses fork to parallelize calculations by loa
   # (if (multicore) parallel::mclapply else lapply)
-  ctype_lev <- lapply(A, transform.svyciprop)
+  ctype_lev <- lapply(A, transform_svyciprop)
   # rowbind of the subgroups dataframes
   ctype_lev <- do.call("rbind", ctype_lev)
   # create variables
@@ -50,7 +50,7 @@ mpitb.A_svymean <- function(k, data, over,
   censored_c.score <- censored_c.score(data$variables$c.score, k)
   # calculate censored deprivation score and add to the dataset
   poor.mpi <- ifelse(data$variables$c.score >= k,1,0)
-  data <- update.svy(data, y = censored_c.score, mpi.k = poor.mpi)
+  data <- update_svy(data, y = censored_c.score, mpi.k = poor.mpi)
 
   # define the vector of the subgroups
   # define the expression for the formula

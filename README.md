@@ -12,8 +12,9 @@ procedures of the original mpitb Stata package.
 
 ## Installation
 
-You can install the development version of mpitb from
-[GitHub](https://github.com/) or installing it from CRAN.
+You can install the development version of mpitbR from
+[GitHub](https://github.com/girelaignacio/mpitbR) or installing it from
+CRAN.
 
 ``` r
 # Define the package name

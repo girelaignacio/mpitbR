@@ -10,7 +10,7 @@ mpitb.est(set, ...)
 \method{mpitb.est}{mpitb_set}(
   set,
   klist = NULL,
-  weights = NULL,
+  weights = "equal",
   measures = c("M0", "H", "A"),
   indmeasures = c("hd", "hdk", "actb", "pctb"),
   indklist = NULL,
@@ -35,7 +35,7 @@ mpitb.est(set, ...)
 
 \item{klist}{a numeric vector representing the poverty cut-offs for calculating the MPI. Should be values between 1 and 100.}
 
-\item{weights}{either a character value or a numeric vector.}
+\item{weights}{either a character value or a numeric vector. If "equal", it automatically calculated equal nested weights.}
 
 \item{measures}{a character vector with the MPI and partial measures. Default include all the measures \code{c("M0","A","H")}. For more information, see Details section below.}
 
@@ -100,7 +100,6 @@ If population subgroups are specified and \code{nooverall} is set to \code{TRUE}
 
 Details on the AF measures estimation:
 
-
 Available measures include the Adjusted Headcount Ratio (\eqn{M_0}), the
 Incidence (\eqn{H}) and the Intensity of poverty (\eqn{A}), as well as other
 indicator-specific measures
@@ -162,7 +161,7 @@ Forking method for parallelization which is only available on Unix-like systems 
 users cannot benefit from parallelization.
 
 For every measure the standard errors and confidence intervals are estimated. The former are estimated taking into
-account the survey structure whereas the latter are estimated considering measures as proportions using \code{\link[survey]{svyciprop()}}
+account the survey structure whereas the latter are estimated considering measures as proportions using \code{svyciprop()}
 function from "survey" R package (it uses the "logit" method which consists of fitting a logistic regression model
 and computes a Wald-type interval on the log-odds scale, which is then transformed to the probability scale).
 }
@@ -182,14 +181,20 @@ set <- mpitb.set(svydata, indicators = indicators, name = "myname", desc = "pref
 
 est <- mpitb.est(set, klist = c(33), measure = "M0",
                  weights = "equal", over = c("area"), multicore = TRUE)
+
+coef(subset(est$lframe, measure == "M0"))
+confint(subset(est$lframe, measure == "M0"))
+summary(subset(est$lframe, measure == "M0"))
 }
 \references{
 \emph{Alkire, S., Foster, J. E., Seth, S., Santos, M. E., Roche, J., & Ballon, P. (2015). Multidimensional poverty measurement and analysis. Oxford University Press.}
 
              \emph{Alkire, S., Roche, J. M., & Vaz, A. (2017). Changes over time in multidimensional poverty: Methodology and results for 34 countries. World Development, 94, 232-249}. \url{10.1016/j.worlddev.2017.01.011}
+
+             \emph{Suppa, N. (2023). mpitb: A toolbox for multidimensional poverty indices. The Stata Journal, 23(3), 625-657}. \url{10.1177/1536867X231195286}
 }
 \seealso{
-\code{coef}, \code{confint}, \code{vcov}, and \code{summary} methods, and \code{mpitb.set} function.
+\code{coef}, \code{confint}, and \code{summary} methods, and \code{mpitb.set} function.
 }
 \author{
 Ignacio Girela

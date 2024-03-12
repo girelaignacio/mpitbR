@@ -13,3 +13,7 @@ set <- mpitb.set(svydata, indicators = indicators, name = "myname", desc = "pref
 
 est <- mpitb.est(set, klist = c(33), measure = "M0",
                  weights = "equal", over = c("area"), multicore = TRUE)
+
+coef(subset(est$lframe, measure == "M0"))
+confint(subset(est$lframe, measure == "M0"))
+summary(subset(est$lframe, measure == "M0"))

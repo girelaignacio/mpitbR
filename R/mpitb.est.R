@@ -8,7 +8,7 @@
 #'
 #' @param set a "mpitb_set"-class object in which data, indicators, names and description have been specified.
 #' @param klist a numeric vector representing the poverty cut-offs for calculating the MPI. Should be values between 1 and 100.
-#' @param weights either a character value or a numeric vector.
+#' @param weights either a character value or a numeric vector. If "equal", it automatically calculated equal nested weights.
 #' @param measures a character vector with the MPI and partial measures. Default include all the measures \code{c("M0","A","H")}. For more information, see Details section below.
 #' @param indmeasures a character vector with the indicator-specific measures. Default include all the measures \code{c("hd", "hdk", "actb", "pctb")}. For more information, see Details section below.
 #' @param indklist a numeric vector representing the poverty cut-offs for calculating indicator-specific measures. Should be values between 1 and 100. If \code{NULL}, it will be equal to \code{klist}.
@@ -56,7 +56,6 @@
 #'  aggregate (or national-level) estimates will not be produced.
 #'
 #' Details on the AF measures estimation:
-#'
 #'
 #' Available measures include the Adjusted Headcount Ratio (\eqn{M_0}), the
 #' Incidence (\eqn{H}) and the Intensity of poverty (\eqn{A}), as well as other
@@ -119,10 +118,9 @@
 #' users cannot benefit from parallelization.
 #'
 #' For every measure the standard errors and confidence intervals are estimated. The former are estimated taking into
-#' account the survey structure whereas the latter are estimated considering measures as proportions using \code{\link[survey]{svyciprop()}}
+#' account the survey structure whereas the latter are estimated considering measures as proportions using \code{svyciprop()}
 #' function from "survey" R package (it uses the "logit" method which consists of fitting a logistic regression model
 #' and computes a Wald-type interval on the log-odds scale, which is then transformed to the probability scale).
-#'
 #'
 #'
 #' @rdname mpitb.est
@@ -131,9 +129,11 @@
 #'
 #'              \emph{Alkire, S., Roche, J. M., & Vaz, A. (2017). Changes over time in multidimensional poverty: Methodology and results for 34 countries. World Development, 94, 232-249}. \url{10.1016/j.worlddev.2017.01.011}
 #'
+#'              \emph{Suppa, N. (2023). mpitb: A toolbox for multidimensional poverty indices. The Stata Journal, 23(3), 625-657}. \url{10.1177/1536867X231195286}
+#'
 #' @example man/examples/example-mpitb.est.R
 #'
-#' @seealso \code{coef}, \code{confint}, \code{vcov}, and \code{summary} methods, and \code{mpitb.set} function.
+#' @seealso \code{coef}, \code{confint}, and \code{summary} methods, and \code{mpitb.set} function.
 #'
 #' @author Ignacio Girela
 
@@ -142,7 +142,7 @@ mpitb.est <- function(set, ...) {UseMethod("mpitb.est", set)}
 #' @rdname mpitb.est
 #' @export
 
-mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
+mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
                         measures = c("M0","H","A"),
                         indmeasures = c("hd","hdk","actb","pctb"), indklist = NULL,
                         over = NULL, ...,
@@ -175,16 +175,16 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
 
   Args <- do.call(".checkArgs_est", myArgs)
   ## Get the checked arguments
-  set = Args$set # ok
-  klist = Args$klist # ok the checks
+  set = Args$set #
+  klist = Args$klist #
 
-  weights = Args$weights # if numeric, do nothing; else if "equal", get the nested weights
+  weights = Args$weights #
   measures = Args$measures #
 
   indmeasures = Args$indmeasures #
   indklist = Args$indklist
 
-  over = Args$over # ok the checks -> already with noverall done
+  over = Args$over
 
   cotyear = Args$cotyear
   tvar = Args$tvar
@@ -196,8 +196,8 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
   cotoptions = Args$cotoptions
   noraw = Args$noraw
 
-  nooverall = Args$nooverall # ok the checks
-  level = Args$level # ok the checks
+  nooverall = Args$nooverall
+  level = Args$level
   multicore = Args$multicore
 
   cot = Args$cot
@@ -209,7 +209,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
   # In this part, some argument of the mpitb.est() functions are treated. More
   # specifically, weights and indicators. If nothing is specified for the
   # weighting scheme, by default, nested equal eights are calculated. All these
-  # treatments are printed, so the user can control if it is ok.
+  # treatments are printed, so the user can control if everything is ok.
   # Finally, the deprivations score is calculated and added to the variables of
   # the survey design.
 
@@ -217,7 +217,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
   {# `indicators` is a list and it is in `set`
   indicators <- set$indicators
   # if `weights` == "equal", create nested weights
-  if (grepl(weights,"equal")) {
+  if ((is.character(weights) && grepl("\\<equal\\>",weights))) {
     weights.scheme <- "equal"
     # equal weights for each dimension
     weight_dim <- 1/length(indicators)
@@ -233,6 +233,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
   } else { # if `weights` is numeric and sum up to 1 (preferred weights specification)
     # indicators as a vector
     weights.scheme <- "pref.spec"
+    dimensions <- NULL
     indicators <- unlist(indicators, use.names = F)
     names(weights) <- indicators
   }
@@ -272,9 +273,9 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
   ## G0_w <- matrix: Weighted Deprivation Matrix
   g0_w <- weighted.g0.matrix(g0, weights)
   # calculate the deprivations score
-  deprivations.score <- c.score(g0_w)
+  deprivations.score <- c_score(g0_w)
   ### Add deprivations score to survey variables data frame (see utils.R)
-  data <- update.svy(data, c.score = deprivations.score)
+  data <- update_svy(data, c.score = deprivations.score)
   # RESULTS:
   # data <- survey.design: Survey design with the deprivations score
 # End of '2.2) CALCULATE THE DEPRIVATION SCORE'
@@ -291,7 +292,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
 
   # In this section, we estimate the MPI and the two main partial AF measures
   # (A and H). Confidence intervals are calculated using svyciprop() function
-  # from the survey R package. This functions do not provide the covariance
+  # from the survey R package. This function does not provide the covariance
   # matrix of the estimates when we calculate measures by year. This prevents
   # from using delta method when calculating the standard errors of functions
   # of the estimates over time (changes over time measures).
@@ -317,13 +318,20 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
 
     lframe <- do.call("rbind",AFmeasuresList)
     class(lframe) <- c("lframe","data.frame")
-
+    attr(lframe,"level") <- level
     cat("DONE\n\n")
     }
 
 # 4) Indicators-related measures ------------------------------------------
 
-# This include hd, hdk, actb and pctb ####
+  # In this section, we estimate the indicator-specific measures such as
+  # hd, hdk, actb and pctb. Confidence intervals are calculated using
+  # svyciprop() function from the survey R package (except for the contribution
+  # measures). This function does not provide the covariance matrix of the
+  # estimates when we calculate measures by year. This prevents from using delta
+  # method when calculating the standard errors of functions of the estimates
+  # over time (changes over time measures).
+
     if (isFALSE(noindmeasure)){
       cat("___________________\n")
       cat("Indicator-specific measures: '", indmeasures,"' under estimation... ")
@@ -355,17 +363,20 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
         # actb
       if("actb"%in%contmeasures){measuresind <- mpitb.actb(measuresind, weights, indicators)}
         # pctb
-      if("pctb"%in%contmeasures){measuresind}
-      ######################
-      ######insert code here
-      ######################
+      if("pctb"%in%contmeasures){
+        pctb <- mpitb.pctb(measuresind,lframe)
+        measuresind <- rbind(measuresind, pctb[pctb$measure %in% "pctb", ])
+      }
+
 
 
       #check if lframe already exists (if nomeasures is FALSE) before binding the indmeasures estimations
       if(!is.null(lframe)){
          lframe <- rbind(lframe,measuresind)
+         class(lframe) <- c("lframe","data.frame")
+         attr(lframe,"level") <- level
        }else{
-           lframe <- indmeasures
+           lframe <- measuresind
          }
       cat("DONE\n\n")
     }
@@ -377,12 +388,20 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
 
 # 5) Changes over time measures -------------------------------------------
 
+  # In this part of the code, we estimate the changes-over-time measures such as
+  # (annualized) absolute and relative changes. The measures are estimated using
+  # svymean() function from the survey R package. This function provides the
+  # covariance matrix of the estimates when we calculate measures by year.
+  # This useful because standard errors are estimated using delta method.
+  # Confidence intervals are estimated assuming normal distribution of the
+  # changes-over-time measures.
+
+
   cotframe <- NULL
 
-# This include absolute and relative (annualized) changes ####
   if(isTRUE(cot)){
     cat("___________________\n")
-    cat("Estimate changes over time over '", cotmeasures,"' measures... \n")
+    cat("Estimate changes over time over '", cotmeasures,"' measures... ")
     # if cotklist is NULL, use the same klist as in cross-sectional AF measures
     if(is.null(cotklist)){cotklist <- klist}
     # some argument check
@@ -404,7 +423,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
     # subset data according to the cotoptions ("total" or "insequence")
     if(cotoptions == "total"){
       #data <- subset(data, t == which.min(years.list) | t == which.max(years.list))
-      data$variables <- data$variables[svydata$variables[, tvar]==which.min(years.list)|data$variables[, tvar]==which.max(years.list), ]
+      data$variables <- data$variables[data$variables[, tvar]==which.min(years.list)|data$variables[, tvar]==which.max(years.list), ]
     } # if "insequence", keep it and calculate year-to-year changes
 
     # separate indicators-related measure of the typical AF measures. This is necessary for efficient arguments vectorization below
@@ -442,6 +461,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
     flattened <- purrr::flatten(cotmeasuresList)
     cotframe <- do.call("rbind",flattened)
     class(cotframe) <- c("cotframe", "data.frame")
+    attr(cotframe,"level") <- level
     cat("DONE\n\n")
   }
 
@@ -450,7 +470,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
   cat("\t\t   ****** RESULTS ******\n")
   cat("___________________\n")
   cat("Parameters\n")
-  if(cot)cat("Numer of time periods: '", length(years.list),"\n")
+  if(cot)cat("Number of time periods: ", length(years.list),"\n")
   cat("Subgroups: ",length(over),"\n")
   cat("Poverty cut-offs (k): ", length(klist),"\n\n")
 
@@ -465,11 +485,12 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = NULL,
   outputList <- list(
     lframe = lframe,
     cotframe = cotframe)
+
   attr(outputList,"name") <- attr(set,"name")
 
   attr(outputList,"desc") <- attr(set,"desc")
 
-  class(set) <- "mpitb_est"
+  class(outputList) <- "mpitb_est"
 
   # End of the code :)
   return(outputList)

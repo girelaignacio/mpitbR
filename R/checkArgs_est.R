@@ -1,4 +1,4 @@
-.checkArgs_est <- function(set, klist = NULL, weights = NULL,
+.checkArgs_est <- function(set, klist = NULL, weights = "equal",
                             measures = c("M0","H","A"),
                             indmeasures = c("hd","hdk","actb","pctb"), indklist = NULL,
                             over = NULL, ...,
@@ -9,9 +9,6 @@
                             multicore = getOption("mpitb.multicore")){
 
 # Check arguments  --------------------------------------------------------
-
-  ### `set` argument ####
-  stopifnot("`set` is not a `mpitb_set`-class object" = class(set) == "mpitb_set")
 
   ### `klist` argument  ####
   ## check if `klist` is not NULL
@@ -33,7 +30,7 @@
     stopifnot("`weights` and indicators do no have the same length" = length(weights) == length(indicators))
   } else {
     stopifnot("`weights` argument is not a character or a numeric vector" = is.character(weights))
-    stopifnot("`weights` argument is not a numeric vector or a character == 'equal' " = grepl("equal",weights))
+    stopifnot("`weights` argument is not a numeric vector or a character == 'equal' " = grepl("\\<equal\\>",weights))
   }
 
   ### `measures` argument ####
@@ -92,6 +89,7 @@
 
   ### `multicore` argument
   ## check if parallel processing
+  if(is.null(multicore)){multicore <- FALSE}
   if(multicore && !requireNamespace("parallel",quietly=TRUE)) {
     multicore <- FALSE
   }
@@ -103,7 +101,7 @@
     ## check if `tvar` is `character`
     stopifnot("`tvar` should be a `character`" = is.character(tvar))
     ## check if `tvar` is of length 1
-    stopifnot("`tvar` should be one element (the column of out data that contains information about the year)" = length(tvar) == 1)
+    stopifnot("`tvar` should be one element (the column name of the data that contains information about the year)" = length(tvar) == 1)
     ## check if `tvar` is in `data` colnames()
     stopifnot("`tvar` not found in `data`" = tvar %in% colnames(set$data))
     ## check if `tvar` is equal to `cotyear`
@@ -113,17 +111,6 @@
     stopifnot("years of `tvar` column are not numeric" = is.numeric(tvars))
     # create a logical variable `cot`  if `tvar` is not null
     cot <- TRUE
-    # if the years are missing, annualized measures cannot be calculated
-    if (is.null(cotyear) & isTRUE(ann)){
-      # if `cotyear` is null `ann` cannot be TRUE
-      ann <- FALSE
-      warning("Years for changes over time measures (`cotyear`) are not specified but `ann` is TRUE.
-            Hence, `ann` is coerced to FALSE and non-annualized measures are only calculated.")
-    } else if (!is.null(cotyear) & isFALSE(ann)) {
-      ann <- FALSE
-      warning("Years for changes over time measures (`cotyear`) are specified but `ann` is FALSE.
-            Hence, `ann` is coerced to FALSE and non-annualized measures are only calculated.")
-    }
   } else {cot <- FALSE}
 
   ### `cotyear` argument
@@ -131,16 +118,22 @@
     ## check if `year` is `character`
     stopifnot("`cotyear` should be a `character`" = is.character(cotyear))
     ## check if `cotyear` is of length 1
-    stopifnot("`cotyear` should be one element (the column of out data that contains information about the year)" = length(cotyear) == 1)
+    stopifnot("`cotyear` should be one element (the column of name of the data that contains information about the year)" = length(cotyear) == 1)
     ## check if `year` is in `data` colnames()
     stopifnot("`cotyear` not found in `data`" = cotyear %in% colnames(set$data))
     ## check if `cotyear` has numeric arguments
     years <- unique(set$data$variables[,cotyear])
     tvars <- unique(set$data$variables[,tvar])
     stopifnot("years of `cotyear` column are not numeric" = is.numeric(years))
-    if(ann == FALSE){warning("years are specified but annualized is not estimated")}
     ann <- TRUE
     stopifnot("Elements of `tvar` and `cotyear` have different length" = length(years) == length(tvars))
+  }
+    # if the years are missing, annualized measures cannot be calculated
+  if (is.null(cotyear) & isTRUE(ann)){
+    # if `cotyear` is null `ann` cannot be TRUE
+    ann <- FALSE
+    warning("Years for changes over time measures (`cotyear`) are not specified but `ann` is TRUE.
+            Hence, `ann` is coerced to FALSE and non-annualized measures are only calculated.")
   }
 
   ### `cotmeasures` argument ####

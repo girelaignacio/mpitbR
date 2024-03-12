@@ -59,17 +59,26 @@ mpitb.set.survey.design2 <- function(data, indicators, ..., name = "unnamed", de
 
 # 1) Catch call -----------------------------------------------------------
 
-  this.call <- match.call()
-  # Print this call so that the user can check if arguments are correctly assigned
-  print(this.call)
-  # Save this.call as list for do.call(".check_mpitb.est", `list`)
-  this.call$... <- NULL
-  list.args <- as.list(this.call)
+  # Get the formal arguments with default values
+  formalArgs <- formals(mpitb.set)
+  # Get the arguments passed to the function
+  myArgs <- as.list(match.call(expand.dots = FALSE))[-1]
+  # Add any missing arguments from formals
+  for (v in names(formalArgs)) {
+    if (!(v %in% names(myArgs))) {
+      myArgs <- append(myArgs, formalArgs[v])
+    }
+  }
+  myArgs$... <- NULL
 
+
+  this.call <- match.call(expand.dots = FALSE)
+  # Print this call so that the user can check if arguments are correctly assigned
+  #print(this.call)
 
 # 2) Check arguments ------------------------------------------------------
 
-  Args <- do.call(".checkArgs_set", list.args)
+  Args <- do.call(".checkArgs_set", myArgs)
 
   ## Get the checked arguments
   data = Args$data
@@ -101,17 +110,26 @@ mpitb.set.data.frame <- function(data, indicators, ..., name = "unnamed", desc =
 
   # 1) Catch call -----------------------------------------------------------
 
-  this.call <- match.call()
-  # Print this call so that the user can check if arguments are correctly assigned
-  print(this.call)
-  # Save this.call as list for do.call(".check_mpitb.est", `list`)
-  this.call$... <- NULL
-  list.args <- as.list(this.call)
+  # Get the formal arguments with default values
+  formalArgs <- formals(mpitb.set)
+  # Get the arguments passed to the function
+  myArgs <- as.list(match.call(expand.dots = FALSE))[-1]
+  # Add any missing arguments from formals
+  for (v in names(formalArgs)) {
+    if (!(v %in% names(myArgs))) {
+      myArgs <- append(myArgs, formalArgs[v])
+    }
+  }
+  myArgs$... <- NULL
 
+
+  this.call <- match.call(expand.dots = FALSE)
+  # Print this call so that the user can check if arguments are correctly assigned
+  #print(this.call)
 
   # 2) Check arguments ------------------------------------------------------
 
-  Args <- do.call(".checkArgs_set", list.args)
+  Args <- do.call(".checkArgs_set", myArgs)
 
   ## Get the checked arguments
   data = Args$data

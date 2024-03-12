@@ -1,7 +1,7 @@
 
 # Update survey design ----------------------------------------------------
 
-update.svy <- function(object, ...) {
+update_svy <- function(object, ...) {
   dots <- substitute(list(...))[-1]
   newnames <- names(dots)
 
@@ -16,11 +16,11 @@ update.svy <- function(object, ...) {
 
 # Transform svyby class ---------------------------------------------------
 
-transform.svyciprop <- function(X){
+transform_svyciprop <- function(X){
   # add subgroup column
-  X$subg <- colnames(X)[1]
+  X$loa <- colnames(X)[1]
   # change column name with the level for "level"
-  colnames(X)[1] <- "loa" # for "level of analysis"
+  colnames(X)[1] <- "subg" # for "level of analysis"
   # preserve colnames
   cols <- colnames(X)
   # rule out rownames

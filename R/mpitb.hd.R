@@ -4,7 +4,7 @@ mpitb.hd_svyciprop <- function(k, indicator, data, over,
   # poverty cutoff as decimal
   k <- k/100
 
-  data <- update.svy(data, y = data$variables[,indicator])
+  data <- update_svy(data, y = data$variables[,indicator])
 
   # define the vector of the subgroups (check if should be calculated over time)
   # define the expression for the formula
@@ -22,7 +22,7 @@ mpitb.hd_svyciprop <- function(k, indicator, data, over,
   # transform.svyciprop function is in utils.R
   # if it is used Linux OS, it uses fork to parallelize calculations by loa
   # (if (multicore) parallel::mclapply else lapply)
-  ctype_lev <- lapply(hd_j, transform.svyciprop)
+  ctype_lev <- lapply(hd_j, transform_svyciprop)
   # rowbind of the subgroups dataframes
   ctype_lev <- do.call("rbind", ctype_lev)
   # create variables
@@ -44,7 +44,7 @@ mpitb.hd_svymean <- function(k, indicator, data, over,
   # poverty cutoff as decimal
   k <- k/100
 
-  data <- update.svy(data, y = data$variables[,indicator])
+  data <- update_svy(data, y = data$variables[,indicator])
 
   # define the vector of the subgroups
   # define the expression for the formula
