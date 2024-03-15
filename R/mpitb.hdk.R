@@ -18,7 +18,7 @@ mpitb.hdk_svyciprop <- function(k, indicator, data, over,
     survey::svyby(survey::make.formula("y"),
                   by=survey::make.formula(by),
                   design=data, survey::svyciprop,
-                  vartype = c("se","ci"), level = level, df = survey::degf(data)))
+                  vartype = c("se","ci"), level = level, df = survey::degf(data), multicore = TRUE))
   # transform the output in a dataframe according to the desired output
   # transform.svyciprop function is in utils.R
   # if it is used Linux OS, it uses fork to parallelize calculations by loa
@@ -59,7 +59,7 @@ mpitb.hdk_svymean <- function(k, indicator, data, over,
   # the covariance for delta method!
   hdk_j <- lapply(bys, function(by) survey::svyby(survey::make.formula("y"),
                                                by=survey::make.formula(by),
-                                               design=data, survey::svymean, covmat = TRUE, na.rm=FALSE))
+                                               design=data, survey::svymean, covmat = TRUE, na.rm=FALSE, multicore = TRUE))
   hdk_j <- lapply(hdk_j, function(x) {attr(x,"indicator") <- indicator; x})
   hdk_j <- lapply(hdk_j, function(x) {attr(x,"measure") <- "hdk"; x})
   hdk_j <- lapply(hdk_j, function(x) {attr(x,"k") <- k*100; x})

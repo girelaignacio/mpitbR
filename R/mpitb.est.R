@@ -438,15 +438,20 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
     # estimate measures by poverty cut-off k
       # before set arguments to vectorize
       # over the AF measures
-    VecArgs <- expand.grid(list(k = cotklist, measure = cotmeasures), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+    if(length(cotmeasures)>0){
+      VecArgs <- expand.grid(list(k = cotklist, measure = cotmeasures), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
 
-    measuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.measure, prop = FALSE, k = VecArgs$k, measure = VecArgs$measure, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+      AFmeasuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.measure, prop = FALSE, k = VecArgs$k, measure = VecArgs$measure, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+    } else {AFmeasuresList <- list()}
       # now over the indicators-related measures
-    VecArgs <- expand.grid(list(k = cotklist, indmeasure = indmeasures, indicator = indicators), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+    if(length(indmeasures)>0){
+      VecArgs <- expand.grid(list(k = cotklist, indmeasure = indmeasures, indicator = indicators), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
 
-    indmeasuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.indmeasure, prop = FALSE, k = VecArgs$k, indmeasure = VecArgs$indmeasure, indicator = VecArgs$indicator, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+      indmeasuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.indmeasure, prop = FALSE, k = VecArgs$k, indmeasure = VecArgs$indmeasure, indicator = VecArgs$indicator, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+    } else {indmeasuresList <- list()}
+
       # merge everything in one list with all the elements flattening all sublists with purrr::flatten
-    measuresList <- purrr::flatten(do.call("c",list(measuresList,indmeasuresList)))
+    measuresList <- purrr::flatten(do.call("c",list(AFmeasuresList,indmeasuresList)))
 
     # Calculate (annualized) absolute and relative changes
 

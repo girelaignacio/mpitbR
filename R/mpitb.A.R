@@ -20,7 +20,7 @@ mpitb.A_svyciprop <- function(k, data, over,
     survey::svyby(survey::make.formula("y"),
                   by=survey::make.formula(by),
                   design=subset(data, data$variables[,'mpi.k']==1), survey::svyciprop,
-                  vartype = c("se","ci"), level = level, df = survey::degf(data)))
+                  vartype = c("se","ci"), level = level, df = survey::degf(data), multicore = TRUE))
   # transform the output in a dataframe according to the desired output
   # transform.svyciprop function is in utils.R
   # if it is used Linux OS, it uses fork to parallelize calculations by loa
@@ -63,7 +63,7 @@ mpitb.A_svymean <- function(k, data, over,
   # the covariance for delta method!
   A <- lapply(bys, function(by) survey::svyby(survey::make.formula("y"),
                                               by=survey::make.formula(by),
-                                              design=subset(data, data$variables[,'mpi.k']==1), survey::svymean, covmat = TRUE, na.rm=FALSE))
+                                              design=subset(data, data$variables[,'mpi.k']==1), survey::svymean, covmat = TRUE, na.rm=FALSE, multicore = TRUE))
   A <- lapply(A, function(x) {attr(x,"indicator") <- NA; x})
   A <- lapply(A, function(x) {attr(x,"measure") <- "A"; x})
   A <- lapply(A, function(x) {attr(x,"k") <- k*100; x})
