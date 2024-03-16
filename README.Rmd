@@ -25,27 +25,46 @@ Here it is provided a package for estimating multidimensional poverty measures b
 
 You can install the development version of mpitbR from [GitHub](https://github.com/girelaignacio/mpitbR) or installing it from CRAN. 
 
-```{r intallation}
-# Define the package name
-package_name <- "mpitbR"
-
-# If the package is not available on CRAN, try installing it from GitHub
-if (!require(package_name, character.only = TRUE)) {
+```{r installation}
+# The package is not available on CRAN for the moment, you can install it from GitHub!
+if (!require("mpitbR", character.only = TRUE)) {
   devtools::install_github("girelaignacio/mpitbR")
-}
-
-# Try installing the package from CRAN
-if (!require(package_name, character.only = TRUE)) {
-  install.packages(package_name)
 }
 
 ```
 This process may take time the first time. 
 
+## A short example 
+
+```{r example}
+# Here we use the same synthetic household survey-like dataset from the Stata package example
+data <- subset(syn_cdta)
+data <- na.omit(data)
+
+# Define the survey structure
+svydata <- survey::svydesign(id=~psu, weights = ~weight, strata = ~stratum, data = data)
+
+# mpitb set command
+  # First we define the indicators with their dimensions names (d1,d2,d3) as a list 
+indicators <- list(d1 = c("d_nutr","d_cm"),
+                   d2 = c("d_satt","d_educ"),
+                   d3 = c("d_elct","d_sani","d_wtr","d_hsg","d_ckfl","d_asst"))
+  # Set the multidimensional poverty measurement project
+set <- mpitb.set(svydata, indicators = indicators, name = "myname", desc = "pref. desc")
+
+# mpitb est command
+  # Estimate! 
+system.time(
+est <- mpitb.est(set, c(20, 33), over = c("area","region"), 
+                 tvar = "t", cotyear = "year")
+)             
+```
+
+
 
 ## Some comparisons with the original Stata package
 
-Under this setting in the <tt>mpitb</tt> Stata package:
+The equivalent command of the previous example in the <tt>mpitb</tt> Stata package is the following:
 
 > mpitb est, name(trial01) measures(all) ///
 indmeasures(all) aux(all)  ///
@@ -59,7 +78,7 @@ Here below, we compare the results from the Stata package and this version in R.
 
 # lframe testing ----------------------------------------------------------
 
-R <- readRDS("~/lframeR.rds")
+R <- est$lframe
 R <- R[,-which(colnames(R) == "ctype")]
 
 Stata <- as.data.frame(haven::read_dta("~/lframe.dta"))
@@ -81,7 +100,7 @@ merged <- merge(R,Stata,by= c("subg","t","loa","measure","k","indicator"))
 # cotframe testing --------------------------------------------------------
 
 
-cotR <- readRDS("~/cotframeR.rds")
+cotR <- est$cotframe
 cotR <- cotR[,-(which(colnames(cotR) == "yt0")) ]
 cotR <- cotR[,-(which(colnames(cotR) == "yt1")) ]
 
