@@ -60,8 +60,10 @@ absolute.change <- function(X, ...){
   change <- as.data.frame(survey::svycontrast(X, contrasts = contrasts))
 
   # calculate confidence intervals
-  change$ll <- change$nlcon - stats::qt(p=(1-dots$level)/2, df=dots$degfs,lower.tail=FALSE) * change$SE
-  change$ul <- change$nlcon + stats::qt(p=(1-dots$level)/2, df=dots$degfs,lower.tail=FALSE) * change$SE
+  #change$ll <- change$nlcon - stats::qt(p=(1-dots$level)/2, df=dots$degfs,lower.tail=FALSE) * change$SE
+  #change$ul <- change$nlcon + stats::qt(p=(1-dots$level)/2, df=dots$degfs,lower.tail=FALSE) * change$SE
+  change$ll <- change$nlcon - stats::qt(p=(1-dots$level)/2, df=Inf,lower.tail=FALSE) * change$SE
+  change$ul <- change$nlcon + stats::qt(p=(1-dots$level)/2, df=Inf,lower.tail=FALSE) * change$SE
 
 
   change$measure <- measure
