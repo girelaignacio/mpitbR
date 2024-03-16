@@ -1,8 +1,7 @@
 mpitb.hd_svyciprop <- function(k, indicator, data, over,
                                 cot, tvar,
                                 level){
-  # poverty cutoff as decimal
-  k <- k/100
+
 
   data <- update_svy(data, y = data$variables[,indicator])
 
@@ -28,7 +27,7 @@ mpitb.hd_svyciprop <- function(k, indicator, data, over,
   # create variables
   ctype_lev$measure <- "hd"
   ctype_lev$ctype <- "lev"
-  ctype_lev$k <- k*100
+  ctype_lev$k <- NA
   ctype_lev$indicator <- indicator
 
   # order dataframe by the column names
@@ -41,8 +40,6 @@ mpitb.hd_svyciprop <- function(k, indicator, data, over,
 mpitb.hd_svymean <- function(k, indicator, data, over,
                               tvar, cotyear,
                               level){
-  # poverty cutoff as decimal
-  k <- k/100
 
   data <- update_svy(data, y = data$variables[,indicator])
 
@@ -60,6 +57,6 @@ mpitb.hd_svymean <- function(k, indicator, data, over,
                                                   design=data, survey::svymean, covmat = TRUE, na.rm=FALSE, multicore = TRUE))
   hd_j <- lapply(hd_j, function(x) {attr(x,"indicator") <- indicator; x})
   hd_j <- lapply(hd_j, function(x) {attr(x,"measure") <- "hd"; x})
-  hd_j <- lapply(hd_j, function(x) {attr(x,"k") <- k*100; x})
+  hd_j <- lapply(hd_j, function(x) {attr(x,"k") <- NA; x})
   return(hd_j)
 }

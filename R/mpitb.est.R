@@ -345,7 +345,8 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
 
       # arguments to vectorize over
       VecArgs <- expand.grid(list(k = klist, indmeasure = indmeasures, indicator = indicators), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
-
+      VecArgs$k[VecArgs$indmeasure=="hd"] <- NA
+      VecArgs <- VecArgs[!duplicated(VecArgs),]
       # MoreArgs (a list of other arguments to the mpitb measures FUN)
       OtherArgs <- list(data = data, over = over,
                       cot = cot, tvar = tvar,
@@ -446,7 +447,8 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
       # now over the indicators-related measures
     if(length(indmeasures)>0){
       VecArgs <- expand.grid(list(k = cotklist, indmeasure = indmeasures, indicator = indicators), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
-
+      VecArgs$k[VecArgs$indmeasure=="hd"] <- NA
+      VecArgs <- VecArgs[!duplicated(VecArgs),]
       indmeasuresList <- (if (multicore) parallel::mcmapply else mapply)(mpitb.indmeasure, prop = FALSE, k = VecArgs$k, indmeasure = VecArgs$indmeasure, indicator = VecArgs$indicator, MoreArgs = OtherArgs, SIMPLIFY = FALSE, USE.NAMES = FALSE)
     } else {indmeasuresList <- list()}
 
