@@ -45,12 +45,12 @@ coef.lframe <- function(object, ...){
 }
 
 
-#' Extract the coefficients from the estimated cross-sectional measures
+#' Extract the coefficients from the estimated changes over time measures
 #'
 #' @param object a "cotframe"-class object
 #' @param ... other arguments.
 #'
-#' @return Coefficients extracted from the model \code{lframe} object.
+#' @return Coefficients extracted from the model \code{cotframe} object.
 #'
 #' @export
 #'
@@ -60,6 +60,8 @@ coef.lframe <- function(object, ...){
 #' only one measure \code{c("M0","H","A","hd","hdk")}. Then, user should subset the
 #' data frame with the estimates by the chosen measure (including other preferred categories, i.e.,
 #' poverty cut-off, subgroup, etc.)
+#'
+#' @example man/examples/example-mpitb.est.R
 #'
 #' @seealso \code{confint}, and \code{summary} methods, and \code{mpitb.est} function.
 #'

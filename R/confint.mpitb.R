@@ -17,6 +17,8 @@
 #' data frame with the estimates by the chosen measure (including other preferred categories, i.e.,
 #' poverty cut-off, subgroup, etc.)
 #'
+#' @example man/examples/example-mpitb.est.R
+#'
 #' @seealso \code{coef}, and \code{summary} methods, and \code{mpitb.est} function.
 #'
 #' @author Ignacio Girela

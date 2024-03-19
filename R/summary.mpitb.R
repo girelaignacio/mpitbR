@@ -105,6 +105,8 @@ print.summary.lframe <- function(x, digits = max(4, getOption("digits") - 3),
 #' poverty cut-off.
 #' Then, user should subset the data frame to obtain the desired summary.
 #'
+#' @example man/examples/example-mpitb.est.R
+#'
 #' @seealso \code{coef}, and \code{confint} methods, and \code{mpitb.est} function.
 #'
 #' @author Ignacio Girela
