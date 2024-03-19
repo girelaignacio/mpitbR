@@ -14,7 +14,7 @@ syn_cdta
 This is a synthetic dataset drawn from the Stata mpitb package. This is the data used in the provided examples.
 }
 \references{
-\url{https://journals.sagepub.com/doi/full/10.1177/1536867X231195286}
+\doi{10.1177/1536867X231195286}
 }
 \author{
 Nicolai Suppa

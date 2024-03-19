@@ -196,9 +196,9 @@ summary(subset(est$cotframe, measure == "M0" & ctype == "abs" & ann == 0 & k == 
 \references{
 \emph{Alkire, S., Foster, J. E., Seth, S., Santos, M. E., Roche, J., & Ballon, P. (2015). Multidimensional poverty measurement and analysis. Oxford University Press.}
 
-             \emph{Alkire, S., Roche, J. M., & Vaz, A. (2017). Changes over time in multidimensional poverty: Methodology and results for 34 countries. World Development, 94, 232-249}. \url{https://doi.org/10.1016/j.worlddev.2017.01.011}
+             \emph{Alkire, S., Roche, J. M., & Vaz, A. (2017). Changes over time in multidimensional poverty: Methodology and results for 34 countries. World Development, 94, 232-249}. \doi{10.1016/j.worlddev.2017.01.011}
 
-             \emph{Suppa, N. (2023). mpitb: A toolbox for multidimensional poverty indices. The Stata Journal, 23(3), 625-657}. \url{https://doi.org/10.1177/1536867X231195286}
+             \emph{Suppa, N. (2023). mpitb: A toolbox for multidimensional poverty indices. The Stata Journal, 23(3), 625-657}. \doi{10.1177/1536867X231195286}
 }
 \seealso{
 \code{coef}, \code{confint}, and \code{summary} methods, and \code{mpitb.set} function.

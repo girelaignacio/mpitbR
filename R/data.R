@@ -5,5 +5,5 @@
 #' @name syn_cdta
 #' @docType data
 #' @author Nicolai Suppa
-#' @references \url{https://journals.sagepub.com/doi/full/10.1177/1536867X231195286}
+#' @references \doi{10.1177/1536867X231195286}
 "syn_cdta"
