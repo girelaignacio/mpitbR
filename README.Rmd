@@ -26,7 +26,12 @@ Here it is provided a package for estimating multidimensional poverty measures b
 You can install the development version of mpitbR from [GitHub](https://github.com/girelaignacio/mpitbR) or installing it from CRAN. 
 
 ```{r installation}
-# The package is not available on CRAN for the moment, you can install it from GitHub!
+# If the package is not available in CRAN you can install it from GitHub!
+# From CRAN
+if (!require("mpitbR", character.only = TRUE)) {
+  install.packages("mpitbR")
+}
+# From Github
 if (!require("mpitbR", character.only = TRUE)) {
   devtools::install_github("girelaignacio/mpitbR")
 }
