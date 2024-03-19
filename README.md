@@ -4,6 +4,8 @@
 # mpitbR: A Toolbox for Calculating Multidimensional Poverty Indices in R
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/girelaignacio/mpitbR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/girelaignacio/mpitbR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Here it is provided a package for estimating multidimensional poverty
@@ -101,7 +103,7 @@ est <- mpitb.est(set, c(20, 33), over = c("area","region"),
 #>   Confidence level: 95 %
 #>   Parallel estimations:  FALSE
 #>    user  system elapsed 
-#>   57.38    1.11   97.77
+#>   45.06    1.00   97.00
 ```
 
 ## Some comparisons with the original Stata package
