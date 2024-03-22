@@ -24,6 +24,7 @@
 #' @param nooverall logical. If \code{TRUE}, estimations over all the observations are omitted, e.g., national level calculations, and only measure for the specified subgroups are estimated. Default is \code{FALSE}.
 #' @param level numeric value with the desired confidence level for the confidence interval calculations in decimal format. Default value is 0.95.
 #' @param multicore logical. Use \code{multicore} package for parallel estimation by measure and poverty cut-off over multiple processors? It uses forking approach. See Details below.
+#' @param verbose logical. If TRUE, print information messages to the console so the user can control the dimension and indicators weights and which measures are being estimated in the process. If FALSE, these messages are ommited.
 #'
 #' @return An object with S3 class "mpitb_est" containing two data frames with the estimates of the cross-sectional measures ("lframe"-class) and changes over time ("cotframe"-class).
 #'
@@ -150,7 +151,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
                         cotmeasures = c("M0","H","A","hd","hdk"), ann = FALSE,
                         cotklist = NULL, cotoptions = "total", noraw = FALSE,
                         nooverall = FALSE, level = 0.95,
-                        multicore = getOption("mpitb.multicore")){
+                        multicore = getOption("mpitb.multicore"), verbose = TRUE){
 
 # Catch call --------------------------------------------------------------
 
@@ -199,10 +200,13 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
   nooverall = Args$nooverall
   level = Args$level
   multicore = Args$multicore
+  verbose = Args$verbose
 
   cot = Args$cot
   nomeasures = Args$nomeasures
   noindmeasure = Args$noindmeasures
+
+
 
 # 2) Some arguments treatment ---------------------------------------------
 
@@ -237,27 +241,28 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
     indicators <- unlist(indicators, use.names = F)
     names(weights) <- indicators
   }
-  cat("\t\t   ****** SPECIFICATION ******\n")
-  cat("Call:\n")
-  print(this.call)
-  cat("Name: ",attr(set,"name"),"\n")
-  cat("Weighting scheme: ", weights.scheme,"\n")
-  cat("Description: ",attr(set,"desc"),"\n")
-
-  cat("___________________\n")
-  if(!is.null(dimensions)){
-    catDimensions <- data.frame(dimensions,weights_dim,
-                              row.names = paste(paste("Dimension ", 1:length(dimensions),": ",sep="")))
-    catDimensions[,3]<-sapply(catDimensions[,1], function(x) paste0("(",toString(indicatorsList[[x]]),")"))
-    colnames(catDimensions) <- NULL
-    print(catDimensions, digits = 3)
+  if (verbose){
+    cat("\t\t   ****** SPECIFICATION ******\n")
+    cat("Call:\n")
+    print(this.call)
+    cat("Name: ",attr(set,"name"),"\n")
+    cat("Weighting scheme: ", weights.scheme,"\n")
+    cat("Description: ",attr(set,"desc"),"\n")
     cat("___________________\n")
-    }
-  catIndicators <- data.frame(indicators,weights,
+    if(!is.null(dimensions)){
+      catDimensions <- data.frame(dimensions,weights_dim,
+                              row.names = paste(paste("Dimension ", 1:length(dimensions),": ",sep="")))
+      catDimensions[,3]<-sapply(catDimensions[,1], function(x) paste0("(",toString(indicatorsList[[x]]),")"))
+      colnames(catDimensions) <- NULL
+      print(catDimensions, digits = 3)
+      cat("___________________\n")
+      }
+    catIndicators <- data.frame(indicators,weights,
                               row.names = paste(paste("Indicator ", 1:length(indicators),": ",sep="")))
-  colnames(catIndicators) <- NULL
-  print(catIndicators, digits = 3)
-  cat("\n")
+    colnames(catIndicators) <- NULL
+    print(catIndicators, digits = 3)
+    cat("\n")
+  }
   # RESULTS
   # indicators <- character: Names of the indicators
   # weights <- numeric: Relative weights of the indicators in the same order as the vector
@@ -283,7 +288,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
 
 
 
-  cat("\t\t   ****** ESTIMATION ******\n")
+  if(verbose){cat("\t\t   ****** ESTIMATION ******\n")}
 
 
 
@@ -300,8 +305,10 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
  lframe <- NULL
 
   if(isFALSE(nomeasures)){
-    cat("___________________\n")
-    cat("Partial AF measures: '",measures,"' under estimation... ")
+    if(verbose){
+      cat("___________________\n")
+      cat("Partial AF measures: '",measures,"' under estimation... ")
+    }
     # arguments to vectorize over
     VecArgs <- expand.grid(list(k = klist, measure = measures), KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
     # MoreArgs (a list of other arguments to the mpitb measures FUN)
@@ -319,7 +326,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
     lframe <- do.call("rbind",AFmeasuresList)
     class(lframe) <- c("lframe","data.frame")
     attr(lframe,"level") <- level
-    cat("DONE\n\n")
+    if(verbose){cat("DONE\n\n")}
     }
 
 # 4) Indicators-related measures ------------------------------------------
@@ -333,9 +340,10 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
   # over time (changes over time measures).
 
     if (isFALSE(noindmeasure)){
-      cat("___________________\n")
-      cat("Indicator-specific measures: '", indmeasures,"' under estimation... ")
-
+      if(verbose){
+        cat("___________________\n")
+        cat("Indicator-specific measures: '", indmeasures,"' under estimation... ")
+      }
       # if indklist is NULL, use the same klist as in cross-sectional AF measures
       if(is.null(indklist)){indklist <- klist}
 
@@ -379,7 +387,7 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
        }else{
            lframe <- measuresind
          }
-      cat("DONE\n\n")
+      if(verbose){cat("DONE\n\n")}
     }
 
 
@@ -401,8 +409,10 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
   cotframe <- NULL
 
   if(isTRUE(cot)){
-    cat("___________________\n")
-    cat("Estimate changes over time over '", cotmeasures,"' measures... ")
+    if(verbose){
+      cat("___________________\n")
+      cat("Estimate changes over time over '", cotmeasures,"' measures... ")
+    }
     # if cotklist is NULL, use the same klist as in cross-sectional AF measures
     if(is.null(cotklist)){cotklist <- klist}
     # some argument check
@@ -469,20 +479,21 @@ mpitb.est.mpitb_set <- function(set, klist = NULL, weights = "equal",
     cotframe <- do.call("rbind",flattened)
     class(cotframe) <- c("cotframe", "data.frame")
     attr(cotframe,"level") <- level
-    cat("DONE\n\n")
+    if(verbose){cat("DONE\n\n")}
   }
 
 
+  if(verbose){
+    cat("\t\t   ****** RESULTS ******\n")
+    cat("___________________\n")
+    cat("Parameters\n")
+    if(cot)cat("Number of time periods: ", length(years.list),"\n")
+    cat("Subgroups: ",length(over),"\n")
+    cat("Poverty cut-offs (k): ", length(klist),"\n\n")
 
-  cat("\t\t   ****** RESULTS ******\n")
-  cat("___________________\n")
-  cat("Parameters\n")
-  if(cot)cat("Number of time periods: ", length(years.list),"\n")
-  cat("Subgroups: ",length(over),"\n")
-  cat("Poverty cut-offs (k): ", length(klist),"\n\n")
-
-  cat("*Notes: \n\t Confidence level:", 100*level,
+    cat("*Notes: \n\t Confidence level:", 100*level,
       "%\n\t Parallel estimations: ", multicore,"\n")
+  }
 
 
 

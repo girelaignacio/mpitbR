@@ -6,7 +6,7 @@
                             cotmeasures = c("M0","H","A","hd","hdk"), ann = FALSE,
                             cotklist = NULL, cotoptions = "total", noraw = FALSE,
                             nooverall = FALSE, level = 0.95,
-                            multicore = getOption("mpitb.multicore")){
+                            multicore = getOption("mpitb.multicore"), verbose = TRUE){
 
 # Check arguments  --------------------------------------------------------
 
@@ -94,6 +94,10 @@
     multicore <- FALSE
   }
 
+  ### `verbose` argument
+  ## check if verbose is logical
+  stopifnot("`verbose` should be a logical" = is.logical(verbose))
+
 # Changes over time arguments ---------------------------------------------
 
   ### `tvar` argument ####
@@ -170,7 +174,7 @@
     cotyear = cotyear, tvar = tvar,
     cotmeasures = cotmeasures, ann = ann,
     cotklist = cotklist, cotoptions = cotoptions, noraw = noraw,
-    nooverall = nooverall, level = level, multicore = multicore,
+    nooverall = nooverall, level = level, multicore = multicore, verbose = verbose,
     cot = cot, nomeasures = nomeasures, noindmeasures = noindmeasures)
     )
 }
