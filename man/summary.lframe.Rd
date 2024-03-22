@@ -40,9 +40,9 @@ indicators <- list(d1 = c("d_nutr","d_cm"),
 set <- mpitb.set(svydata, indicators = indicators, name = "myname", desc = "pref. desc")
 
 # Estimate the cross-sectional MPI and compare non-annualized changes over time
-est <- mpitb.est(set, klist = c(33), measures = "M0", indmeasures = NULL,
+est <- mpitb.est(set, klist = c(33), measures = "M0", indmeasures = "hdk",
                  tvar = "t", cotmeasures = "M0",
-                 weights = "equal", over = c("area"))
+                 weights = "equal", over = c("area"), verbose = FALSE)
 
 coef(subset(est$lframe, measure == "M0" & t == 1))
 confint(subset(est$lframe, measure == "M0" & t == 1))

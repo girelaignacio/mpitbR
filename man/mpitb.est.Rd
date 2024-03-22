@@ -25,7 +25,8 @@ mpitb.est(set, ...)
   noraw = FALSE,
   nooverall = FALSE,
   level = 0.95,
-  multicore = getOption("mpitb.multicore")
+  multicore = getOption("mpitb.multicore"),
+  verbose = TRUE
 )
 }
 \arguments{
@@ -64,6 +65,8 @@ mpitb.est(set, ...)
 \item{level}{numeric value with the desired confidence level for the confidence interval calculations in decimal format. Default value is 0.95.}
 
 \item{multicore}{logical. Use \code{multicore} package for parallel estimation by measure and poverty cut-off over multiple processors? It uses forking approach. See Details below.}
+
+\item{verbose}{logical. If TRUE, print information messages to the console so the user can control the dimension and indicators weights and which measures are being estimated in the process. If FALSE, these messages are ommited.}
 }
 \value{
 An object with S3 class "mpitb_est" containing two data frames with the estimates of the cross-sectional measures ("lframe"-class) and changes over time ("cotframe"-class).
@@ -181,9 +184,9 @@ indicators <- list(d1 = c("d_nutr","d_cm"),
 set <- mpitb.set(svydata, indicators = indicators, name = "myname", desc = "pref. desc")
 
 # Estimate the cross-sectional MPI and compare non-annualized changes over time
-est <- mpitb.est(set, klist = c(33), measures = "M0", indmeasures = NULL,
+est <- mpitb.est(set, klist = c(33), measures = "M0", indmeasures = "hdk",
                  tvar = "t", cotmeasures = "M0",
-                 weights = "equal", over = c("area"))
+                 weights = "equal", over = c("area"), verbose = FALSE)
 
 coef(subset(est$lframe, measure == "M0" & t == 1))
 confint(subset(est$lframe, measure == "M0" & t == 1))
