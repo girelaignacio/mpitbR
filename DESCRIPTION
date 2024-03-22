@@ -1,16 +1,13 @@
 Package: mpitbR
 Type: Package
-Title: "Calculate Alkire-Foster Multidimensional Poverty Measures"
+Title: Calculate Alkire-Foster Multidimensional Poverty Measures
 Version: 1.0.0
 Authors@R: c(
     person("Ignacio", "Girela", email = "ignacio.girela@unc.edu.ar", role = c("aut", "cre","cph"), comment = c(ORCID = "0000-0003-3297-3854")),
     person("CONICET", role = c("fnd")))
 Maintainer: Ignacio Girela <ignacio.girela@unc.edu.ar>
 Description: 
-    Calculate Multidimensional Poverty Indices based on the Alkire and Foster method (2011) <doi:10.1016/j.jpubeco.2010.11.006>. 
-    This includes other partial indices such as incidence and intensity of poverty disaggregated by groups or indicators.
-    For intertemporal changes analysis, the absolute and relative changes-over-time measures can be estimated for all partial measures.
-    The standard errors and confidence intervals are calculated considering the complex survey design. 
+    Point estimates, standard errors and confidence intervals of Multidimensional Poverty Indices based on the Alkire and Foster method (2011) <doi:10.1016/j.jpubeco.2010.11.006>. This includes other partial indices such as incidence and intensity of poverty disaggregated by groups or indicators as well as intertemporal changes analysis. The standard errors and confidence intervals are calculated considering the complex survey design. 
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
