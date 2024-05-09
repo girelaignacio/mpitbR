@@ -6,6 +6,8 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/girelaignacio/mpitbR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/girelaignacio/mpitbR/actions/workflows/R-CMD-check.yaml)
+
+[![](https://cranlogs.r-pkg.org/badges/mpitbR)](https://cran.r-project.org/package=mpitbR)
 <!-- badges: end -->
 
 Here it is provided a package for estimating multidimensional poverty
@@ -25,6 +27,7 @@ if (!require("mpitbR", character.only = TRUE)) {
   install.packages("mpitbR")
 }
 #> Loading required package: mpitbR
+#> Warning: package 'mpitbR' was built under R version 4.3.3
 # From Github
 if (!require("mpitbR", character.only = TRUE)) {
   devtools::install_github("girelaignacio/mpitbR")
@@ -103,7 +106,7 @@ est <- mpitb.est(set, c(20, 33), over = c("area","region"),
 #>   Confidence level: 95 %
 #>   Parallel estimations:  FALSE
 #>    user  system elapsed 
-#>   45.06    1.00   97.00
+#>   44.86    0.94   73.26
 ```
 
 ## Some comparisons with the original Stata package
