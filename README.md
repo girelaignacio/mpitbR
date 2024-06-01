@@ -6,7 +6,6 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/girelaignacio/mpitbR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/girelaignacio/mpitbR/actions/workflows/R-CMD-check.yaml)
-
 [![](https://cranlogs.r-pkg.org/badges/mpitbR)](https://cran.r-project.org/package=mpitbR)
 <!-- badges: end -->
 
@@ -106,7 +105,7 @@ est <- mpitb.est(set, c(20, 33), over = c("area","region"),
 #>   Confidence level: 95 %
 #>   Parallel estimations:  FALSE
 #>    user  system elapsed 
-#>   44.86    0.94   73.26
+#>   10.82    0.19   31.78
 ```
 
 ## Some comparisons with the original Stata package
