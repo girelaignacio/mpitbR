@@ -19,6 +19,9 @@ Imports:
 Depends: 
     R (>= 2.10)
 Suggests: 
-    parallel
+    knitr,
+    parallel,
+    rmarkdown
 URL: https://github.com/girelaignacio/mpitbR
 BugReports: https://github.com/girelaignacio/mpitbR/issues
+VignetteBuilder: knitr

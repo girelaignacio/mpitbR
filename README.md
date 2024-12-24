@@ -7,9 +7,11 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/girelaignacio/mpitbR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/girelaignacio/mpitbR/actions/workflows/R-CMD-check.yaml)
-[![](https://cranlogs.r-pkg.org/badges/grand-total/mpitbR)](https://cran.r-project.org/package=mpitbR)
-
+[![](https://www.r-pkg.org/badges/version/mpitbR?color=orange)](https://cran.r-project.org/package=mpitbR)
+[![](http://cranlogs.r-pkg.org/badges/grand-total/mpitbR?color=green)](https://cran.r-project.org/package=mpitbR)
+[![R build
+status](https://github.com/girelaignacio/mpitbR/workflows/R-CMD-check/badge.svg)](https://github.com/girelaignacio/mpitbR/actions)
+[![](https://img.shields.io/badge/doi-10.1177/1536867X231195286-yellow.svg)](https://doi.org/10.1177/1536867X231195286)
 <!-- badges: end -->
 
 Here it is provided a package for estimating multidimensional poverty
@@ -69,7 +71,7 @@ Multidimensional Poverty Measures*. R package version 1.0.0,
 A BibTeX entry for LaTeX users is
 
 ``` r
-@Manual{mpitbR1.0.0,
+@Manual{mpitbRpkg,
     title = {mpitbR: Calculate Alkire-Foster Multidimensional Poverty Measures},
     author = {Ignacio Girela},
     year = {2024},
@@ -96,45 +98,3 @@ Contributions are welcome! Please open an issue or submit a pull request
 Please, do not hesitate to contact me!
 
 Ignacio Girela (📧 <ignacio.girela@unc.edu.ar>)
-
-## Some comparisons with the original Stata package
-
-The equivalent command of the previous example in the <tt>mpitb</tt>
-Stata package is the following:
-
-> mpitb est, name(trial01) measures(all) /// indmeasures(all) aux(all)
-> /// klist(20 33) weight(equal) /// lframe(myresults, replace) /// svy
-> over(area region) /// cotmeasures(all) cotframe(mycot, replace)
-> tvar(t) cotyear(year)
-
-Here below, we compare the results from the Stata package and this
-version in R. We merged both data frames with the results (point
-estimate, standard errors, and confidence intervals). We calculate the
-L1 distance between the estimates ($|\theta_{R}-\theta_{Stata}|$) by
-measure in the case of the “lframe” results and by ctype and annualized
-measure in the case of the “cotframe” results.
-
-The following output shows the summary of the distribution of this
-comparisons (suffix “.x” refers to the estimates of the R package and
-“.y” to the Stata version).
-
-``` r
-# "lframe" COMPARISONS
-aggregate(abs(b.x - b.y)~ measure, merged, summary)
-aggregate(abs(se.x - se.y)~ measure, merged, summary)
-aggregate(abs(ll.x - ll.y)~ measure, merged, summary)
-aggregate(abs(ul.x - ul.y)~ measure, merged, summary)
-# "cotframe" COMPARISONS
-aggregate(abs(b.x - b.y)~ ctype+ann, cot.merged, summary)
-aggregate(abs(se.x - se.y)~ ctype+ann, cot.merged, summary)
-aggregate(abs(ll.x - ll.y)~ ctype+ann, cot.merged, summary)
-aggregate(abs(ul.x - ul.y)~ ctype+ann, cot.merged, summary)
-```
-
-All the results are very close with some exceptions found in few
-estimates of the standard errors of the relative changes over time
-measures. Since the point estimates (“b”) are close and Delta method is
-used for calculating the standard errors, here there may be some
-differences between the “survey” library in R and Stata
-
-------------------------------------------------------------------------
