@@ -11,7 +11,6 @@
 [![](http://cranlogs.r-pkg.org/badges/grand-total/mpitbR?color=green)](https://cran.r-project.org/package=mpitbR)
 [![R build
 status](https://github.com/girelaignacio/mpitbR/workflows/R-CMD-check/badge.svg)](https://github.com/girelaignacio/mpitbR/actions)
-[![](https://img.shields.io/badge/doi-10.1177/1536867X231195286-yellow.svg)](https://doi.org/10.1177/1536867X231195286)
 <!-- badges: end -->
 
 Here it is provided a package for estimating multidimensional poverty

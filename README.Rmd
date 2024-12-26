@@ -26,8 +26,7 @@ knitr::opts_chunk$set(
 cat(
 	badger::badge_cran_release("mpitbR", "orange"),
 	badger::badge_cran_download("mpitbR", "grand-total", "green"),
-	badger::badge_github_actions(),
-	badger::badge_doi("10.1177/1536867X231195286", "yellow")
+	badger::badge_github_actions()#,badger::badge_doi("10.1177/1536867X231195286", "yellow")
 )
 ```
 <!-- badges: end -->
