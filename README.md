@@ -7,6 +7,8 @@
 
 <!-- badges: start -->
 
+[![CRAN
+version](https://www.r-pkg.org/badges/version/mpitbR?color=orange)](https://cran.r-project.org/package=mpitbR)
 [![R build
 status](https://github.com/girelaignacio/mpitbR/workflows/R-CMD-check/badge.svg)](https://github.com/girelaignacio/mpitbR/actions)
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/mpitbR)](https://cran.r-project.org/package=mpitbR)
