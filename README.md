@@ -12,6 +12,7 @@ version](https://www.r-pkg.org/badges/version/mpitbR?color=orange)](https://cran
 [![R build
 status](https://github.com/girelaignacio/mpitbR/workflows/R-CMD-check/badge.svg)](https://github.com/girelaignacio/mpitbR/actions)
 [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/mpitbR)](https://cran.r-project.org/package=mpitbR)
+
 <!-- badges: end -->
 
 Here it is provided a package for estimating multidimensional poverty
@@ -87,7 +88,13 @@ This project is licensed under the [GPL (\>=
 
 ### Documentation
 
-For more detailed information, please refer to the documentation.
+For more detailed information, please refer to the documentation
+
+**IMPORTANT**: A more detailed vignette on the usage of the package is
+under construction. Meanwhile, for exploring the package’s basic
+functionalities, you can refer to this submitted [draft
+document](https://www.researchgate.net/publication/380394221_mpitbR_a_Toolbox_for_Measuring_Multidimensional_Poverty_Indices_in_R),
+which has not undergone peer review
 
 ### Contributing
 
