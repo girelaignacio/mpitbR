@@ -1,0 +1,167 @@
+---
+title: "An Introduction to `mpitbR`"
+author: 
+  - Girela, Ignacio 
+bibliography: references.bib
+link-citations: true
+date: VIGNETTE UNDER CONSTRUCTION
+output: 
+  rmarkdown::pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{An introduction to mpitbR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+`mpitbR` is a package for calculating Alkire-Foster class measures of multidimensional poverty. The Alkire-Foster method distinguishes itself for its versatility in adjusting the indicators, weighting schemes, and poverty cut-offs to different contexts. Indeed, this method is the formal scaffold of the global Multidimensional Poverty Index (MPI), a comparably international measure of acute poverty, yearly published by the Oxford Poverty and Human Development Initiative (OPHI) and the United Nations Development Programme (UNDP). In addition, other regional or national MPIs have been created by adapting the global MPI forms to better address local realities.
+
+The global MPI is presented for more than 100 countries, together with ten constituent indicators aligned with Sustainable Development Goals (SDGs), as well as with recommendations of the World Bank’s *Atkinson Commission on Monitoring Global Poverty*. Committed to transparency and collaboration, OPHI publishes all technical files to reproduce their findings. This includes all the Stata do-files to prepare the microdata for generating the global MPI indicators. Then, the global MPI estimates are calculated using the 'mpitb' Stata package developed by Nicolai Suppa [@suppa2023].
+
+The `mpitbR` package faithfully replicates the estimation procedures of the original Stata 'mpitb' package, ensuring methodological consistency for researchers using different programming languages. By offering an R implementation, `mpitbR` contributes to a more integrated and collaborative research ecosystem around the global MPI, aligning with OPHI's encouragement of international collaboration.
+
+This vignette describes basic usage guide for this package, illustrated with real world examples. First, we begin with an introduction to the Alkire-Foster method and the global MPI. subsequently, we demonstrate how to install and start using the `mpitbR` package. For those already familiar to the AF method, can directly proceed to Section 3 and explore multidimensional poverty analysis in practice.
+
+# Multidimensional Poverty Measurement: the Alkire-Foster Method
+
+Due to the widely acknowledgement of the multidimensional nature poverty both in academic and policy circles, this century has witnessed an significant emergence of multidimensional poverty measurement methodologies. Among these, the 'dual cut-off' framework proposed by @alkire2011 has gained prominent attention for its flexibility and key-policy properties.
+
+The Alkire-Foster (AF) method can be summarized in the following steps:
+
+1.  **Establish the data source**
+
+    One of the most salient features of the AF measure is the ability to consider the multiple deprivations faced by the poor jointly. Therefore, all the information ought to come from the same data source, commonly household surveys.
+
+    When designing a multidimensional poverty measure, stakeholders decide which the data source will best align with the poverty measure. As we will see, this selection is linked to two following steps.
+
+2.  **Determine the unit of analysis**
+
+    Depending on the purpose of the MPI in question, the unit of analysis will be defined, i.e., who or what is being studied (individuals, households or even communities). This step influences the choice of indicators, the data source, and interpretation of results. For simplicity, we will refer to 'person' as the unit of analysis.
+
+3.  **Select the dimensions and indicators**
+
+    Poverty is a complex phenomenon, however, for measuring purposes it is necessary to define which dimensions of human development a measure will focus on. Each dimension will be represented by a set of $d \in \mathbb{N}$ indicators (e.g., years of schooling and children school attendance are the two indicators that represents education dimension in the global MPI).
+
+    To represent people's well-being in all dimensions, an $n \times d$ dimensional achievement matrix $\mathbf{X}$ is defined, where each element $x_{ij} \in \mathbb{R}_+$ is an ordinal variable that denote the achievement or well-being status of the person $i$ in the $j$-th indicator, for $i = 1,\ldots,n$.
+
+4.  **Define each indicator deprivation cut-off**
+
+    A first cut-off $z_j$ is defined as the minimum level of achievement necessary for being non-deprived in indicator $j$.
+
+# The `mpitbR` package
+
+## Installation
+
+The simplest way to install `mpitbR` is to download and install it directly from CRAN by typing the following command in R console:
+
+```{r, eval=FALSE}
+install.packages("mpitbR")
+```
+
+Another way is to install the development version from the `mpitbR` Github repository:
+
+```{r, eval=FALSE}
+library(devtools)
+
+install_github("girelaignacio/mpitbR")
+```
+
+## Cross-sectional estimates
+
+## Changes over time
+
+# Appendix
+
+## Appendix 1: Moving from Stata to R
+
+This appendix will contain some comparisons between estimates in the R and Stata version of the package.
+
+The equivalent command of the previous example in the 'mpitb' Stata package is the following:
+
+``` stata
+mpitb est, name(trial01) measures(all) indmeasures(all) aux(all) \\\ 
+
+  klist(20 33) weight(equal) lframe(myresults, replace) \\\ 
+
+  svy over(area region) cotmeasures(all) cotframe(mycot, replace) tvar(t) cotyear(year)
+```
+
+Here below, we compare the results from the Stata package and this version in R. We merged both data frames with the results (point estimate, standard errors, and confidence intervals). We calculate the L1 distance between the estimates ($|\theta_{R}-\theta_{Stata}|$) by measure in the case of the "lframe" results and by ctype and annualized measure in the case of the "cotframe" results.
+
+```{r read_the_dataframes, echo=FALSE, eval=FALSE}
+
+# lframe testing ----------------------------------------------------------
+
+R <- est$lframe
+R <- R[,-which(colnames(R) == "ctype")]
+
+Stata <- as.data.frame(haven::read_dta("~/lframe.dta"))
+
+Stata <- Stata[, !(names(Stata) %in% c("spec","wgts","pval","tval"))]
+Stata$subg[which(is.na(Stata$subg))] <- "nat"
+Stata <- Stata[-( which(Stata$measure == "popsh")),]
+Stata$indicator[which(Stata$indicator== "")] <- NA
+Stata <- Stata[,-which(colnames(Stata) == "ctype")]
+Stata <- Stata[names(R)]
+
+R<-R[order(R$subg, R$t, R$loa,R$measure,R$k,R$indicator),]
+Stata<-Stata[order(Stata$subg, Stata$t, Stata$loa,Stata$measure,Stata$k,Stata$indicator),]
+
+merged <- merge(R,Stata,by= c("subg","t","loa","measure","k","indicator"))
+
+
+
+# cotframe testing --------------------------------------------------------
+
+
+cotR <- est$cotframe
+cotR <- cotR[,-(which(colnames(cotR) == "yt0")) ]
+cotR <- cotR[,-(which(colnames(cotR) == "yt1")) ]
+
+cotStata <- as.data.frame(haven::read_dta("~/cotframe.dta"))
+cotStata <- cotStata[, !(names(cotStata) %in% c("spec","wgts","pval","tval","yt0","yt1","t0","t1"))]
+cotStata$subg[which(is.na(cotStata$subg))] <- "nat"
+cotStata$indicator[which(cotStata$indicator== "")] <- NA
+cotStata$ctype <- haven::zap_labels(cotStata$ctype)
+cotStata$ctype[which(cotStata$ctype == 1)] <- "abs"
+cotStata$ctype[which(cotStata$ctype == 2)] <- "rel"
+
+
+cotStata <- cotStata[names(cotR)]
+
+cotR<-cotR[order(cotR$subg, cotR$loa,cotR$measure,cotR$k,cotR$indicator,cotR$ctype,cotR$ann),]
+cotStata<-cotStata[order(cotStata$subg, cotStata$loa,cotStata$measure,cotStata$k,cotStata$indicator, cotStata$ctype, cotStata$ann),]
+
+
+cot.merged <- merge(cotR,cotStata,by= c("subg","loa","measure","k","indicator","ctype","ann"))
+
+```
+
+The following output shows the summary of the distribution of this comparisons (suffix ".x" refers to the estimates of the R package and ".y" to the Stata version).
+
+```{r summaries, echo=T, eval=FALSE}
+# "lframe" COMPARISONS
+aggregate(abs(b.x - b.y)~ measure, merged, summary)
+aggregate(abs(se.x - se.y)~ measure, merged, summary)
+aggregate(abs(ll.x - ll.y)~ measure, merged, summary)
+aggregate(abs(ul.x - ul.y)~ measure, merged, summary)
+# "cotframe" COMPARISONS
+aggregate(abs(b.x - b.y)~ ctype+ann, cot.merged, summary)
+aggregate(abs(se.x - se.y)~ ctype+ann, cot.merged, summary)
+aggregate(abs(ll.x - ll.y)~ ctype+ann, cot.merged, summary)
+aggregate(abs(ul.x - ul.y)~ ctype+ann, cot.merged, summary)
+
+```
+
+All the results are very close with some exceptions found in few estimates of the standard errors of the relative changes over time measures. Since the point estimates ("b") are close and Delta method is used for calculating the standard errors, here there may be some differences between the "survey" library in R and Stata.
+
+## Appendix 2: Considerations on convergence in some estimates
+
+## Appendix 3: Parallel computations for Windows OS users
+
+# References
