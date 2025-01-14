@@ -301,7 +301,7 @@ library(mpitbR)
 head(ben_dhs06)
 ```
 
-Note that the `mpitbR` package operates directly on the uncensored deprivation matrix, where all the indicators columns contain binary values (0 and 1). Consequently, the package cannot be used for earlier stages of the analysis, such as generating deprivation indicators or making normative decisions regarding their definition.
+**!** Note that the `mpitbR` package operates directly on the uncensored deprivation matrix, where all the indicators columns contain binary values (0 and 1). Consequently, the package cannot be used for earlier stages of the analysis, such as generating deprivation indicators or making normative decisions regarding their definition.
 
 ### Missing values
 
@@ -335,7 +335,7 @@ We observe a higher frequency of missing values within the Health dimension indi
 ben_dhs06 <- na.omit(ben_dhs06)
 ```
 
-As emphasized above, if one observation (unit of analysis) has a missing value, all other observations belonging to the same group (unit of identification) exhibit a missing value for that variable. While OPHI do-files prevent this to occur, practitioners should remain attentive to such inconsistencies in their measurement projects.
+**!** If one observation (unit of analysis) has a missing value, all other observations belonging to the same group (unit of identification) exhibit a missing value for that variable. While OPHI do-files prevent this to occur, practitioners should remain attentive to such inconsistencies in their measurement projects.
 
 ### Household survey design
 
@@ -380,12 +380,15 @@ The core of this package is `mpitb.est`, designed for estimating the MPI and the
 
 The `mpitb.est` function offers several arguments to allow for customized MPI calculations. Here below, we outline the key arguments (for a comprehensive list of arguments and their descriptions, type `?mpitb.est` in your R console):
 
-- `set` is the multidimensional poverty measurement project settings previously defined with `mpitb.set`.    
-- `k` is the vector of poverty cut-offs (values between 1 and 100).  
+- `set` is the multidimensional poverty measurement project settings previously defined with `mpitb.set`.  
+
+- `k` is the vector of poverty cut-offs (values between 1 and 100). 
+
 - `weights` is for vector specifying the weighting scheme for each dimension. By default, equal nested weights are used, as employed in the global MPI.   
+
 - `measures` refers to the main aggregate measures to be calculated ($M_0$, $H$, or $A$). 
+
 - `indmeasures` are all the indicator-specific measures, such as censored and raw headcount ratios, and their absolute and percentage contribution to overall poverty.
-- `over` is a character vector containing the column names of the population groups for which poverty will be analyzed. 
 
 By default, all measures are estimated. 
 
@@ -395,7 +398,7 @@ As an example, we will now demonstrate the estimation of the global MPI for Beni
 
 ```{r first_globalMPI}
 # Estimate the Benin global MPI 2006
-estimate.01 <- mpitb.est(set, k = 33, measures = c("M0"), indmeasures = NULL)
+estimate.01 <- mpitb.est(set, k = 33, measures = "M0", indmeasures = NULL)
 ```
 Upon execution, the `mpitb.est` function displays a message that includes the function call itself, a list of dimensions with their assigned indicators and corresponding weights (allowing users to verify the setup), the specific measures that have been estimated, relevant estimation parameters such as the number of poverty cut-offs and subgroups analyzed, and other important features like the confidence level used for calculating confidence intervals and whether parallel estimation has been employed. This detailed message can be suppressed by setting the `verbose` argument to `FALSE` within the `mpitb.est` function call.
 
@@ -403,14 +406,79 @@ The estimation results are stored in the `estimate.01` object, which is an insta
 
 ```{r head_first_globalMPI}
 # Take a glance at the results
-head(estimate.01$lframe)
+as.data.frame(estimate.01$lframe)
 ```
 
 This displays the raw data frame of our estimates. The first four columns provide the point estimate (`b`), the standard error of the point estimate (`se`), which accounts for the survey design, and the lower and upper bound of the confidence interval (`lb` and `ub`), with confidence intervals calculated considering the measures as proportions. `measure` and `k` columns indicate the specific AF measure and poverty cut-off, respectively, to which each estimate corresponds.
 
 ### Analyzing poverty across population groups
 
-- Explore disparities across population groups
+We have previously established that the MPI can be calculated as the sum of the MPIs of mutually exclusive population subgroups, weighted by the population share of each group. This decomposition is crucial for identifying sociodemographic disparities in poverty distribution. Typically, global MPI analyses explore differences across rural-urban areas, different age cohorts, and by gender.
+
+To calculate the MPI for specific subgroups, utilize the `over` argument within the `mpitb.est` function. This argument accepts a character vector specifying the column names of the population groups for which poverty analysis is desired.
+
+To illustrate, let's examine disparities between rural and urban areas in Benin during 2006. We can execute the following code:
+ 
+```{r rural-urban}
+# Include living areas in the MPI calculation
+estimate.02 <- mpitb.est(set, k = 33, measures = "M0", indmeasures = NULL, 
+                         over = "area", verbose = FALSE)
+
+# View results
+as.data.frame(estimate.02$lframe)
+```
+
+Again, results are presented as a data frame. The population group (in this case, `area`) is identified in `loa` column, which stands for 'level of analysis'. The corresponding MPI estimates for each level of analysis are labeled by each subgroup in the `subg` column. Note that another `loa` entry exists with a unique subgroup called "nat". This represents the MPI estimate calculated across all the observations within the data set, generally at the national level. To exclude the overall national estimate, set the `overall` argument to `FALSE` within the `mpitb.est` function.
+
+The following code generates a barplot using `ggplot2` to visualize and compare national, and living-area poverty levels.
+
+```{r plot_rural-urban, fig.cap="Multidimensional Poverty by Living Areas in Benin 2006",fig.width=3, fig.height=3, fig.align="center"}
+ggplot(as.data.frame(estimate.02$lframe), aes(x = subg, y = b, fill = subg)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.5) +
+    geom_errorbar(aes(ymin = ll, ymax = ul), width = 0.1) +
+    labs(x = "Level of Analysis", y = "MPI", fill = "Subgroups") +
+    theme_bw() +
+    theme(legend.position = "bottom") 
+```
+
+Figure \@ref(fig:plot_rural-urban) demonstrates that poverty levels in rural areas are significantly higher than in urban areas of Benin ($0.531$ and $0.285$, respectively). This suggests that, on average, individuals experiencing poverty in rural regions exhibit a higher degree of multidimensional poverty compared to their urban counterparts.
+
+Confidence intervals are displayed at the top of each bar. A good practice for comparing poverty levels is to examine if the confidence intervals do not overlap. In this example, it is possible to infer that multidimensional poverty in rural Benin is statistically higher than in urban Benin. 
+
+To further investigate whether higher multidimensional poverty in rural Benin is primarily driven by a larger proportion of poor individuals (incidence, $H$) or by the rural poor experiencing greater deprivation (intensity, $A$), we can incorporate these two measures into our previous analysis using the `measures` argument.
+
+```{r rural-urban2}
+# Include incidence H and intesity A in the MPI calculation
+estimate.03 <- mpitb.est(set, k = 33, measures = c("M0","H","A"), indmeasures = NULL, 
+                         over = c("area"), verbose = FALSE)
+
+# Explore coefficients of H and A
+  # Incidence
+coef(subset(estimate.03$lframe, measure == "H" & loa == "area"))
+ # Intensity
+coef(subset(estimate.03$lframe, measure == "A" & loa == "area"))
+```
+While the intensity of poverty is statistically higher in rural areas of Benin than in urban areas, the difference in intensity compared to urban areas is not as pronounced as the difference in incidence ($87.59\%$ of the rural population experiencing multidimensional poverty compared to $52.73\%$ in urban areas).
+
+**!** A final important caveat: when analyzing multidimensional poverty across different subgroups, avoid subsetting the dataset to isolate specific groups before specifying the measurement project with `mpitb.set` function. Subsetting the data can impact the degrees of freedom, potentially compromising the accuracy of statistical inferences. 
+
+### Indicator-specific measures analysis
+
+Breaking down the MPI by indicators provides valuable insights in multidimensional poverty analysis. We can compare the censored and uncensored headcount ratios of each indicator and explore their contribution (absolute and percentage) to the MPI. This granular analysis can be further refined by examining these contributions across different population subgroups, offering a high-resolution lens of poverty within a society.
+
+As mentioned earlier, the argument `indmeasures` in the `mpitb.est` function encompasses all the indicator-specific measures and, by default, all of them are calculated. This is why we previously set this argument to `NULL`. 
+
+```{r indicators_measures}
+# Estimate indicator-specific measures
+  # We specify nothing in `indmeasures`
+  # since all of them are calculated by default. 
+estimate.04 <- mpitb.est(set, k = 33, measures = "M0", 
+                         over = "area")
+
+# View results
+head(estimate.04$lframe)
+```
+
 
 ## Changes over time
 
