@@ -5,7 +5,7 @@
 \alias{ben_dhs17_18}
 \title{Preprocessed Benin DHS 17-18 dataset}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 73728 rows and 18 columns.
+An object of class \code{data.frame} with 73728 rows and 18 columns.
 }
 \source{
 - DHS Program: https://ohss.dhs.gov/about-our-data
