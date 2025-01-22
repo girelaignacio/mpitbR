@@ -21,7 +21,8 @@ Depends:
 Suggests: 
     knitr,
     parallel,
-    rmarkdown
+    rmarkdown,
+    tidyverse
 URL: https://github.com/girelaignacio/mpitbR
 BugReports: https://github.com/girelaignacio/mpitbR/issues
 VignetteBuilder: knitr
