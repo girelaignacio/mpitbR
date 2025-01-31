@@ -19,9 +19,12 @@ Imports:
 Depends: 
     R (>= 2.10)
 Suggests: 
+    gridExtra,
     knitr,
     parallel,
     rmarkdown,
+    scales,
+    stringi,
     tidyverse
 URL: https://github.com/girelaignacio/mpitbR
 BugReports: https://github.com/girelaignacio/mpitbR/issues
