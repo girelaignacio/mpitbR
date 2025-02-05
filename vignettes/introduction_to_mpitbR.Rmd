@@ -14,7 +14,7 @@ output:
 vignette: >
   %\VignetteIndexEntry{An introduction to mpitbR}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
 
 # Introduction
