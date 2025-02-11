@@ -1,4 +1,4 @@
-# mpitbR (development version)
+# mpitbR 1.0.1
 
 * This is the first release of `mpitbR` package. 
 
