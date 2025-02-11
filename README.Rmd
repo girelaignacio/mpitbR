@@ -82,8 +82,8 @@ A BibTeX entry for LaTeX users is
 @Manual{mpitbRpkg,
     title = {mpitbR: Calculate Alkire-Foster Multidimensional Poverty Measures},
     author = {Ignacio Girela},
-    year = {2024},
-    note = {R package version 1.0.0},
+    year = {2025},
+    note = {R package version 1.0.1},
     url = {https://CRAN.R-project.org/package=mpitbR},
   }
 ```
@@ -95,13 +95,13 @@ This project is licensed under the [GPL (\>=
 
 ### Documentation
 
-For more detailed information, please refer to the documentation
-
-**IMPORTANT**: A more detailed vignette on the usage of the package is
-under construction. Meanwhile, for exploring the package's basic
-functionalities, you can refer to this submitted [draft
-document](https://www.researchgate.net/publication/380394221_mpitbR_a_Toolbox_for_Measuring_Multidimensional_Poverty_Indices_in_R),
-which has not undergone peer review
+For exploring the package's basic functionalities, please refer to the
+[documentation](https://cran.r-project.org/web/packages/mpitbR/mpitbR.pdf)
+and the
+[vignette](https://cran.r-project.org/web/packages/mpitbR/vignettes/introduction_to_mpitbR.pdf).
+Furthermore, you can refer to this [draft
+document](https://www.researchgate.net/publication/380394221_mpitbR_a_Toolbox_for_Measuring_Multidimensional_Poverty_Indices_in_R)
+submitted to the R Journal, which has not undergone peer review
 
 ### Contributing
 
