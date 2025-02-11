@@ -1,0 +1,16 @@
+package,old,new,delta
+mpitbR,1.0.0,1.0.0.9000,*
+cli,3.6.3,3.6.3,
+DBI,1.2.3,1.2.3,
+glue,1.8.0,1.8.0,
+lifecycle,1.0.4,1.0.4,
+magrittr,2.0.3,2.0.3,
+minqa,1.2.8,1.2.8,
+mitools,2.4,2.4,
+numDeriv,2016.8-1.1,2016.8-1.1,
+purrr,1.0.4,1.0.4,
+Rcpp,1.0.14,1.0.14,
+RcppArmadillo,14.2.3-1,14.2.3-1,
+rlang,1.1.5,1.1.5,
+survey,4.4-2,4.4-2,
+vctrs,0.6.5,0.6.5,

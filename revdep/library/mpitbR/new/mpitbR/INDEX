@@ -1,0 +1,24 @@
+ben_dhs06               Preprocessed Benin DHS 06 dataset
+ben_dhs17_18            Preprocessed Benin DHS 17-18 dataset
+coef.cotframe           Extract the coefficients from the estimated
+                        changes over time measures
+coef.lframe             Extract the coefficients from the estimated
+                        cross-sectional measures
+confint.cotframe        Extract the confidence intervals from the the
+                        estimated changes over time measures
+confint.lframe          Extract the confidence intervals from the the
+                        estimated cross-sectional measures
+mpitb.est               Estimate multidimensional poverty indices based
+                        on the Alkire-Foster method
+mpitb.set               Set the specification of the Multidimensional
+                        Poverty Measurement and Analysis project
+print.summary.cotframe
+                        Print Summary function of summary.cotframe
+                        object
+print.summary.lframe    Print Summary function of summary.lframe object
+summary.cotframe        Summary function of the estimates of the
+                        changes over time measures
+summary.lframe          Summary function of the estimates of the
+                        cross-sectional AF measures
+syn_cdta                Synthetic dataset with a typical household
+                        survey design
